@@ -17,13 +17,24 @@ class StatusBar extends DrawableObject {
         'img/7_statusbars/1_statusbar/1_statusbar_coin/blue/100.png'
     ];
 
+    IMAGES_BOTTLES = [
+        'img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/0.png',
+        'img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/20.png',
+        'img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/40.png',
+        'img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/60.png',
+        'img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/80.png',
+        'img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/100.png'
+    ];
+
     percentageHealth = 100;
     percentageCoins = 0;
+    percentageBottles = 0;
 
     constructor() {
         super();
         this.loadImages(this.IMAGES_HEALTH);
         this.loadImages(this.IMAGES_COINS);
+        this.loadImages(this.IMAGES_BOTTLES);
         this.x = 20;
         this.y = 0;
         this.width = 200;
@@ -35,6 +46,8 @@ class StatusBar extends DrawableObject {
             this.percentageHealth = percentage;
         } else if (type === 'coins') {
             this.percentageCoins = percentage;
+        } else if (type === 'bottles') {
+            this.percentageBottles = percentage;
         }
     }
 
@@ -52,8 +65,12 @@ class StatusBar extends DrawableObject {
         let healthPath = this.IMAGES_HEALTH[this.resolveImageIndex(this.percentageHealth)];
         ctx.drawImage(this.imageCache[healthPath], this.x, this.y, this.width, this.height);
 
-        // Coins-Bar (darunter)
+        // Coins-Bar
         let coinsPath = this.IMAGES_COINS[this.resolveImageIndex(this.percentageCoins)];
-        ctx.drawImage(this.imageCache[coinsPath], this.x, this.y + this.height -10, this.width, this.height);
+        ctx.drawImage(this.imageCache[coinsPath], this.x, this.y + this.height - 10, this.width, this.height);
+
+        // Bottles-Bar (unter Coins)
+        let bottlesPath = this.IMAGES_BOTTLES[this.resolveImageIndex(this.percentageBottles)];
+        ctx.drawImage(this.imageCache[bottlesPath], this.x, this.y + (this.height - 10) * 2, this.width, this.height);
     }
 }

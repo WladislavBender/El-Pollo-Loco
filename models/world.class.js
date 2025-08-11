@@ -46,6 +46,13 @@ class World {
         this.statusBar.setPercentage('coins', coinPercentage);
     }
 
+    collectBottle() {
+        this.bottles += 1;
+        let bottlePercentage = Math.min((this.bottles / this.totalBottles) * 100, 100);
+        this.statusBar.setPercentage('bottles', bottlePercentage);
+    }
+
+
     checkThrowObjects() {
         if (this.keyboard.D) {
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
