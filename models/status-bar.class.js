@@ -1,50 +1,59 @@
-class StatusBar extends DrawableObject{
-
-
-
-    IMAGES = [
-        'img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png', // 0
+class StatusBar extends DrawableObject {
+    IMAGES_HEALTH = [
+        'img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png',
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/20.png',
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/40.png',
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/60.png',
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/80.png',
-        'img/7_statusbars/1_statusbar/2_statusbar_health/green/100.png', // 5
-    ]
+        'img/7_statusbars/1_statusbar/2_statusbar_health/green/100.png'
+    ];
 
-    percentage = 100;
+    IMAGES_COINS = [
+        'img/7_statusbars/1_statusbar/1_statusbar_coin/blue/0.png',
+        'img/7_statusbars/1_statusbar/1_statusbar_coin/blue/20.png',
+        'img/7_statusbars/1_statusbar/1_statusbar_coin/blue/40.png',
+        'img/7_statusbars/1_statusbar/1_statusbar_coin/blue/60.png',
+        'img/7_statusbars/1_statusbar/1_statusbar_coin/blue/80.png',
+        'img/7_statusbars/1_statusbar/1_statusbar_coin/blue/100.png'
+    ];
 
+    percentageHealth = 100;
+    percentageCoins = 0;
 
     constructor() {
         super();
-        this.loadImages(this.IMAGES);
+        this.loadImages(this.IMAGES_HEALTH);
+        this.loadImages(this.IMAGES_COINS);
         this.x = 20;
         this.y = 0;
         this.width = 200;
         this.height = 60;
-        this.setPercentage(100);
     }
 
-    //setPercentage(50)
-    setPercentage(percentage) {
-        this.percentage = percentage; // => 0....5
-        let path = this.IMAGES[this.resolveImageIndex()];
-        this.img = this.imageCache[path];
-
-    }
-
-    resolveImageIndex() {
-        if (this.percentage == 100) {
-            return 5;
-        } else if (this.percentage > 80) {
-            return 4;
-        } else if (this.percentage > 60) {
-            return 3;
-        } else if (this.percentage > 40) {
-            return 2;
-        } else if (this.percentage > 20) {
-            return 1;
-        } else {
-            return 0;
+    setPercentage(type, percentage) {
+        if (type === 'health') {
+            this.percentageHealth = percentage;
+        } else if (type === 'coins') {
+            this.percentageCoins = percentage;
         }
+    }
+
+    resolveImageIndex(percentage) {
+        if (percentage >= 100) return 5;
+        if (percentage > 80) return 4;
+        if (percentage > 60) return 3;
+        if (percentage > 40) return 2;
+        if (percentage > 20) return 1;
+        return 0;
+    }
+
+    draw(ctx) {
+        // Health-Bar
+        let healthPath = this.IMAGES_HEALTH[this.resolveImageIndex(this.percentageHealth)];
+        ctx.drawImage(this.imageCache[healthPath], this.x, this.y, this.width, this.height);
+
+        // Coins-Bar (darunter)
+        let coinsPath = this.IMAGES_COINS[this.resolveImageIndex(this.percentageCoins)];
+        ctx.drawImage(this.imageCache[coinsPath], this.x, this.y + this.height -10, this.width, this.height);
     }
 }

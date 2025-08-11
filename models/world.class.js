@@ -34,12 +34,19 @@ class World {
         this.level.enemies.forEach((enemy) => {
             if (this.character.isColliding(enemy)) {
                 this.character.hit();
-                this.statusBar.setPercentage(this.character.energy);
+                this.statusBar.setPercentage('health', this.character.energy);
             }
-        })
+        });
     }
 
-    checkThrowObjects(){
+    // Beispiel: wenn ein Coin eingesammelt wird
+    collectCoin() {
+        this.coins += 1;
+        let coinPercentage = Math.min((this.coins / this.totalCoins) * 100, 100);
+        this.statusBar.setPercentage('coins', coinPercentage);
+    }
+
+    checkThrowObjects() {
         if (this.keyboard.D) {
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
             this.throwableObjects.push(bottle);
