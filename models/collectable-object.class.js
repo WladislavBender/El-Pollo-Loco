@@ -16,13 +16,17 @@ class CollectableObject extends MovableObject {
         this.type = type;
         this.x = x;
         this.y = y;
-        this.height = 60;
-        this.width = 60;
 
         if (type === 'bottle') {
-            let randomImg = this.IMAGES_COLLECTABLE_BOTTLES[Math.floor(Math.random() * this.IMAGES_COLLECTABLE_BOTTLES.length)];
+            this.height = 110; // Größe für Bottles
+            this.width = 110;
+            let randomImg = this.IMAGES_COLLECTABLE_BOTTLES[
+                Math.floor(Math.random() * this.IMAGES_COLLECTABLE_BOTTLES.length)
+            ];
             this.loadImage(randomImg);
         } else if (type === 'coin') {
+            this.height = 180; // Größe für Coins
+            this.width = 180;
             this.loadImage(this.IMAGES_COLLECTABLE_COINS[0]);
             this.loadImages(this.IMAGES_COLLECTABLE_COINS);
             this.animateCoins();
