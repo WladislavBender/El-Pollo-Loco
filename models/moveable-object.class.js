@@ -8,15 +8,6 @@ class MovableObject extends DrawableObject {
     lastHit = 0;
 
 
-    applyGravity() {
-        setInterval(() => {
-            if (this.isAboveGround() || this.speedY > 0) {
-                this.y -= this.speedY;
-                this.speedY -= this.acceleration;
-            }
-        }, 100 / 25);
-    }
-
 
     isAboveGround() {
         if (this instanceof ThrowableObject) { // ThrowableObjects should always fall
@@ -27,13 +18,24 @@ class MovableObject extends DrawableObject {
     }
 
 
-    // character.isColliding(chicken);
+    // **ÄNDERUNG: echte Rechteck-Überlappung**
     isColliding(mo) {
         return this.x + this.width > mo.x &&
+            this.x < mo.x + mo.width &&
             this.y + this.height > mo.y &&
-            this.x < mo.x &&
             this.y < mo.y + mo.height;
     }
+
+    // Optional aber sinnvoll (Timing): vorher 100/25 war 4ms
+    applyGravity() {
+        setInterval(() => {
+            if (this.isAboveGround() || this.speedY > 0) {
+                this.y -= this.speedY;
+                this.speedY -= this.acceleration;
+            }
+        }, 100 / 25); // **ÄNDERUNG (optional)**
+    }
+
 
 
     hit() {

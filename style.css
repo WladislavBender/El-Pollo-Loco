@@ -1,6 +1,6 @@
 @font-face {
-  font-family: myFont;
-  src: url('fonts/Arbutus-Regular.ttf');
+    font-family: myFont;
+    src: url('fonts/Arbutus-Regular.ttf');
 }
 
 body {
@@ -8,7 +8,6 @@ body {
     flex-direction: column;
     align-items: center;
     background-image: url('img/background_desert.jpg');
-    background-position: top;
     font-family: myFont, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 

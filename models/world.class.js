@@ -36,16 +36,19 @@ class World {
         // Zufällige Bottles
         for (let i = 0; i < 5; i++) {
             let x = Math.random() * 2000 + 200;
-            let y = 350;
+            let y = 350; // Bottles bleiben fix
             this.collectableObjects.push(new CollectableObject('bottle', x, y));
         }
-        // Zufällige Coins
+        // Zufällige Coins mit y-Variation
         for (let i = 0; i < 10; i++) {
             let x = Math.random() * 2000 + 200;
-            let y = 300;
+            let baseY = 300;
+            let yOffset = Math.random() * 60 - 120;
+            let y = baseY + yOffset;
             this.collectableObjects.push(new CollectableObject('coin', x, y));
         }
     }
+
 
     setWorld() {
         this.character.world = this;
@@ -53,15 +56,78 @@ class World {
 
     run() {
         setInterval(() => {
+            // checkBottleHits hier entfernen**
             this.checkCollisions();
             this.checkThrowObjects();
+            // this.checkBottleHits();  // ENTFERNT**
         }, 200);
     }
+
+
+    draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.translate(this.camera_x, 0);
+
+        this.addObjectsToMap(this.level.backgroundObjects);
+
+        this.ctx.translate(-this.camera_x, 0);
+        this.addToMap(this.statusBar);
+        this.ctx.translate(this.camera_x, 0);
+
+        // **NEU: pro Frame auf Flaschen-Treffer prüfen**
+        this.checkBottleHits();
+
+        this.addToMap(this.character);
+        this.addObjectsToMap(this.level.enemies);
+        this.addObjectsToMap(this.level.clouds);
+        this.addObjectsToMap(this.collectableObjects);
+        this.addObjectsToMap(this.throwableObjects);
+
+        this.ctx.translate(-this.camera_x, 0);
+
+        let self = this;
+        requestAnimationFrame(function () {
+            self.draw();
+        });
+    }
+
+    checkBottleHits() {
+        this.throwableObjects.forEach((bottle, bottleIndex) => {
+            this.level.enemies.forEach((enemy, enemyIndex) => {
+                if (!enemy.dead && bottle.isColliding(enemy)) { // **nutzt die korrigierte isColliding**
+
+                    if (enemy instanceof Chicken) {
+                        enemy.dead = true;
+                        enemy.loadImage(enemy.IMAGE_DEAD[0]);
+                        enemy.speed = 0;
+                        // optional: aus dem Array entfernen
+                        setTimeout(() => this.level.enemies.splice(enemyIndex, 1), 200);
+                    }
+
+                    if (enemy instanceof Endboss) {
+                        enemy.hit();
+                        if (enemy.isDead()) {
+                            enemy.dead = true;
+                            // animate() zeigt jetzt automatisch IMAGES_DEAD
+                            enemy.speed = 0;
+                        }
+                        // bei Hurt übernimmt animate() die Hurt-Animation
+                    }
+
+                    // Flasche nach Treffer entfernen
+                    this.throwableObjects.splice(bottleIndex, 1);
+                }
+            });
+        });
+    }
+
+
+
 
     checkCollisions() {
         // Gegner
         this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy)) {
+            if (!enemy.dead && this.character.isColliding(enemy)) {
                 this.character.hit();
                 this.statusBar.setPercentage('health', this.character.energy);
             }
@@ -117,35 +183,6 @@ class World {
         }
     }
 
-
-
-    draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        this.ctx.translate(this.camera_x, 0);
-
-        this.addObjectsToMap(this.level.backgroundObjects);
-
-        this.ctx.translate(-this.camera_x, 0); // Back
-        //----------Space for fixed Objects
-        this.addToMap(this.statusBar);
-        this.ctx.translate(this.camera_x, 0); // Forwards
-
-        this.addToMap(this.character);
-        this.addObjectsToMap(this.level.enemies);
-        this.addObjectsToMap(this.level.clouds);
-        this.addObjectsToMap(this.collectableObjects);
-        this.addObjectsToMap(this.throwableObjects);
-
-        this.ctx.translate(-this.camera_x, 0);
-
-
-        //Draw() wird immer wieder aufgerufen
-        let self = this
-        requestAnimationFrame(function () {
-            self.draw();
-        });
-    }
 
     addObjectsToMap(objects) {
         objects.forEach(o => {
