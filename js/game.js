@@ -19,6 +19,9 @@ window.addEventListener("DOMContentLoaded", () => {
     const startScreen = document.getElementById("start-screen");
 
     startBtn.addEventListener("click", () => {
+        // 1. Level initialisieren
+        initLevel();
+
         // Spiel starten
         init();
 
@@ -46,7 +49,7 @@ function circleTransition(callback) {
         ctx.save();
         ctx.globalCompositeOperation = "destination-out";
         ctx.beginPath();
-        ctx.arc(tCanvas.width/2, tCanvas.height/2, radius, 0, Math.PI * 2);
+        ctx.arc(tCanvas.width / 2, tCanvas.height / 2, radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 

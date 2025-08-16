@@ -13,56 +13,70 @@ body {
 
 
 #content {
-  position: relative;
-  display: inline-block; /* passt sich an Canvas-Größe an */
+    position: relative;
+    display: inline-block;
+    /* passt sich an Canvas-Größe an */
 }
 
 #start-screen {
-  position: absolute;
-  top: 166px;
-  left: 0;
-  width: 720px;
-  height: 480px;
-  background: rgba(0,0,0,0.8); /* Fallback-Hintergrund */
-  background-image: url('./img/9_intro_outro_screens/start/startscreen_1.png'); /* Pfad zum Bild */
-  background-size: cover;   /* Bild füllt den Bereich */
-  background-position: center;
-  border: 6px solid white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-  opacity: 1;
-  transition: opacity 1s ease-in;
+    position: absolute;
+    top: 166px;
+    left: 0;
+    width: 720px;
+    height: 480px;
+    background: rgba(0, 0, 0, 0.8);
+    /* Fallback-Hintergrund */
+    background-image: url('./img/9_intro_outro_screens/start/startscreen_1.png');
+    /* Pfad zum Bild */
+    background-size: cover;
+    /* Bild füllt den Bereich */
+    background-position: center;
+    border: 6px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 1s ease-in;
 }
 
 #start-screen.fade-out {
-  opacity: 0;
-  pointer-events: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .overlay-content {
-  text-align: center;
-  color: white;
-  background: rgba(0,0,0,0.5);
-  padding: 20px;
-  border-radius: 10px;
+    text-align: center;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
 }
 
 #start-btn {
-  padding: 12px 24px;
-  font-size: 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #ff9800;
-  color: white;
-  transition: transform 0.2s, background 0.2s;
+    padding: 12px 24px;
+    font-size: 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #ff9800;
+    color: white;
+    transition: transform 0.2s, background 0.2s;
 }
 
 #start-btn:hover {
-  transform: scale(1.05);
-  background: #e68900;
+    transform: scale(1.05);
+    background: #e68900;
+}
+
+.instructions {
+    font-size: 18px;
+    color: #ffffff;
+    width: 698px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px 16px;
 }
 
 #content {

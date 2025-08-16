@@ -14,7 +14,6 @@
     <script src="models/chicken.class.js"></script>
     <script src="models/cloud.class.js"></script>
     <script src="models/status-bar.class.js"></script>
-    <script src="models/world.class.js"></script>
     <script src="models/background-object.class.js"></script>
     <script src="models/keyboard.class.js"></script>
     <script src="models/level.class.js"></script>
@@ -22,10 +21,11 @@
     <script src="models/throwable-object.class.js"></script>
     <script src="models/endboss.class.js"></script>
     <script src="levels/level1.js"></script>
+    <script src="models/world.class.js"></script>
     <script src="js/game.js"></script>
 </head>
 
-<body onload="init()">
+<body>
 
     <div id="content">
         <h1>El Pollo Loco</h1>
@@ -34,13 +34,16 @@
         <!-- Startbildschirm -->
         <div id="start-screen">
             <div class="overlay-content">
-                <h2>Willkommen bei El Pollo Loco</h2>
                 <button id="start-btn">Start</button>
             </div>
         </div>
     </div>
 
-
+<div class="instructions">
+    <p>Movement: LEFT & RIGHT Arrows</p>
+    <p>Jump: SPACE</p>
+    <p>Throw: D</p>
+</div>
 
 
 </body>
