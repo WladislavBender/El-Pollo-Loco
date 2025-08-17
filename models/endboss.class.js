@@ -4,10 +4,11 @@ class Endboss extends MovableObject {
     width = 250;
     y = 55;
     dead = false;
-    inAlert = false;   // NEU
-    inAttack = false;  // NEU
-    moving = false;    // NEU
-    direction = -100;    // -1 = links, +1 = rechts
+    inAlert = false;
+    inAttack = false;
+    moving = false;
+    direction = -100;
+    energy = 100; // 5 Treffer à 20%
 
     IMAGES_WALKING = [
         'img/4_enemie_boss_chicken/1_walk/G1.png',
@@ -50,16 +51,24 @@ class Endboss extends MovableObject {
         'img/4_enemie_boss_chicken/5_dead/G26.png',
     ];
 
-
     constructor() {
-        super().loadImage(this.IMAGES_WALKING[0]);
+        super(); // <— wichtig: erst super(), dann this.*
+        this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_ALERT);
         this.loadImages(this.IMAGES_ATTACK);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_DEAD);
+
         this.x = 2500;
         this.animate();
+    }
+
+    // Boss nimmt 20 Schaden pro Flasche + setzt lastHit (triggert Hurt-Anim)
+    hit() {
+        this.energy -= 20;
+        if (this.energy < 0) this.energy = 0;
+        this.lastHit = new Date().getTime();
     }
 
     startAlert() {
@@ -67,7 +76,7 @@ class Endboss extends MovableObject {
         setTimeout(() => {
             this.inAlert = false;
             this.startMoving();
-        }, 1000); // 2 Sek. Alarm-Animation, danach Bewegung
+        }, 1000);
     }
 
     startMoving() {
@@ -76,7 +85,7 @@ class Endboss extends MovableObject {
 
     startAttack() {
         this.inAttack = true;
-        setTimeout(() => this.inAttack = false, 1000); // Attack dauert 1 Sek.
+        setTimeout(() => this.inAttack = false, 1000);
     }
 
     animate() {

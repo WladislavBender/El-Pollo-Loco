@@ -26,15 +26,26 @@ class StatusBar extends DrawableObject {
         'img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/100.png'
     ];
 
+    IMAGES_ENDBOSS = [
+        'img/7_statusbars/2_statusbar_endboss/orange/orange0.png',
+        'img/7_statusbars/2_statusbar_endboss/orange/orange20.png',
+        'img/7_statusbars/2_statusbar_endboss/orange/orange40.png',
+        'img/7_statusbars/2_statusbar_endboss/orange/orange60.png',
+        'img/7_statusbars/2_statusbar_endboss/orange/orange80.png',
+        'img/7_statusbars/2_statusbar_endboss/orange/orange100.png'
+    ];
+
     percentageHealth = 100;
     percentageCoins = 0;
     percentageBottles = 0;
+    percentageEndboss = 100;
 
     constructor() {
         super();
         this.loadImages(this.IMAGES_HEALTH);
         this.loadImages(this.IMAGES_COINS);
         this.loadImages(this.IMAGES_BOTTLES);
+        this.loadImages(this.IMAGES_ENDBOSS);
         this.x = 20;
         this.y = 0;
         this.width = 200;
@@ -48,8 +59,11 @@ class StatusBar extends DrawableObject {
             this.percentageCoins = percentage;
         } else if (type === 'bottles') {
             this.percentageBottles = percentage;
+        } else if (type === 'endboss') {
+            this.percentageEndboss = percentage;
         }
     }
+
 
     resolveImageIndex(percentage) {
         if (percentage >= 100) return 5;
@@ -60,8 +74,9 @@ class StatusBar extends DrawableObject {
         return 0;
     }
 
+
     draw(ctx) {
-        // Health-Bar
+        // Character Health-Bar (links)
         let healthPath = this.IMAGES_HEALTH[this.resolveImageIndex(this.percentageHealth)];
         ctx.drawImage(this.imageCache[healthPath], this.x, this.y, this.width, this.height);
 
@@ -69,8 +84,14 @@ class StatusBar extends DrawableObject {
         let coinsPath = this.IMAGES_COINS[this.resolveImageIndex(this.percentageCoins)];
         ctx.drawImage(this.imageCache[coinsPath], this.x, this.y + this.height - 10, this.width, this.height);
 
-        // Bottles-Bar (unter Coins)
+        // Bottles-Bar
         let bottlesPath = this.IMAGES_BOTTLES[this.resolveImageIndex(this.percentageBottles)];
         ctx.drawImage(this.imageCache[bottlesPath], this.x, this.y + (this.height - 10) * 2, this.width, this.height);
+
+        // 👉 Endboss-Bar (rechts oben im Canvas)
+        let bossPath = this.IMAGES_ENDBOSS[this.resolveImageIndex(this.percentageEndboss)];
+        ctx.drawImage(this.imageCache[bossPath], 500, 0, this.width, this.height);
+        // 500 kannst du an Canvas-Breite anpassen → z.B. canvas.width - this.width - 20
     }
+
 }

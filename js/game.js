@@ -35,34 +35,34 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-function circleTransition(callback) {
-    const tCanvas = document.getElementById("transition");
-    const ctx = tCanvas.getContext("2d");
-    let radius = 0;
+// function circleTransition(callback) {
+//     const tCanvas = document.getElementById("transition");
+//     const ctx = tCanvas.getContext("2d");
+//     let radius = 0;
 
-    function animate() {
-        ctx.clearRect(0, 0, tCanvas.width, tCanvas.height);
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, tCanvas.width, tCanvas.height);
+//     function animate() {
+//         ctx.clearRect(0, 0, tCanvas.width, tCanvas.height);
+//         ctx.fillStyle = "black";
+//         ctx.fillRect(0, 0, tCanvas.width, tCanvas.height);
 
-        // Kreis "Loch" ins Schwarz
-        ctx.save();
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.beginPath();
-        ctx.arc(tCanvas.width / 2, tCanvas.height / 2, radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+//         // Kreis "Loch" ins Schwarz
+//         ctx.save();
+//         ctx.globalCompositeOperation = "destination-out";
+//         ctx.beginPath();
+//         ctx.arc(tCanvas.width / 2, tCanvas.height / 2, radius, 0, Math.PI * 2);
+//         ctx.fill();
+//         ctx.restore();
 
-        radius += 15; // Geschwindigkeit
-        if (radius < Math.max(tCanvas.width, tCanvas.height)) {
-            requestAnimationFrame(animate);
-        } else {
-            tCanvas.remove();
-            if (callback) callback();
-        }
-    }
-    animate();
-}
+//         radius += 15; // Geschwindigkeit
+//         if (radius < Math.max(tCanvas.width, tCanvas.height)) {
+//             requestAnimationFrame(animate);
+//         } else {
+//             tCanvas.remove();
+//             if (callback) callback();
+//         }
+//     }
+//     animate();
+// }
 
 
 

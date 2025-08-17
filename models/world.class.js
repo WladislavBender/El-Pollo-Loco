@@ -99,24 +99,24 @@ class World {
     checkBottleHits() {
         this.throwableObjects.forEach((bottle, bottleIndex) => {
             this.level.enemies.forEach((enemy, enemyIndex) => {
-                if (!enemy.dead && bottle.isColliding(enemy)) { // **nutzt die korrigierte isColliding**
+                if (!enemy.dead && bottle.isColliding(enemy)) {
 
                     if (enemy instanceof Chicken) {
                         enemy.dead = true;
                         enemy.loadImage(enemy.IMAGE_DEAD[0]);
                         enemy.speed = 0;
-                        // optional: aus dem Array entfernen
                         setTimeout(() => this.level.enemies.splice(enemyIndex, 1), 200);
                     }
 
                     if (enemy instanceof Endboss) {
-                        enemy.hit();
+                        enemy.hit(); // <-- wichtig: ruft das Override oben auf (20 dmg + lastHit)
+                        this.statusBar.setPercentage('endboss', enemy.energy);
+
                         if (enemy.isDead()) {
                             enemy.dead = true;
-                            // animate() zeigt jetzt automatisch IMAGES_DEAD
                             enemy.speed = 0;
+                            // animate() spielt automatisch IMAGES_DEAD
                         }
-                        // bei Hurt übernimmt animate() die Hurt-Animation
                     }
 
                     // Flasche nach Treffer entfernen
@@ -125,6 +125,7 @@ class World {
             });
         });
     }
+
 
 
 
