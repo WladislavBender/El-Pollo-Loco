@@ -70,7 +70,6 @@ class Character extends MovableObject {
 
     world;
 
-
     constructor() {
         super().loadImage('img/2_character_pepe/2_walk/W-21.png');
         this.loadImages(this.IMAGES_IDLE);
@@ -82,30 +81,32 @@ class Character extends MovableObject {
         this.applyGravity();
         this.animate();
 
-        // Zeitpunkt der letzten Bewegung merken
+        // Zeitpunkt der letzten Aktivität (Bewegung ODER D-Taste)
         this.lastMoveTime = new Date().getTime();
     }
-
 
     animate() {
 
         // --- Bewegung & Eingaben prüfen ---
         setInterval(() => {
+            const kb = this.world?.keyboard;
+            if (!kb) return; // world evtl. noch nicht gesetzt
+
             let moving = false;
 
-            if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
+            if (kb.RIGHT && this.x < this.world.level.level_end_x) {
                 this.moveRight();
                 this.otherDirection = false;
                 moving = true;
             }
 
-            if (this.world.keyboard.LEFT && this.x > 0) {
+            if (kb.LEFT && this.x > 0) {
                 this.moveLeft();
                 this.otherDirection = true;
                 moving = true;
             }
 
-            if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+            if (kb.SPACE && !this.isAboveGround()) {
                 this.jump();
                 moving = true;
             }
@@ -113,15 +114,17 @@ class Character extends MovableObject {
             // Kamera bewegen
             this.world.camera_x = -this.x + 100;
 
-            // Wenn Bewegung stattfand, Zeit zurücksetzen
-            if (moving) {
+            // Aktivität erkannt: Bewegung ODER D zum Werfen
+            if (moving || kb.D) {
                 this.lastMoveTime = new Date().getTime();
             }
         }, 1000 / 60);
 
-
         // --- Animationen steuern ---
         setInterval(() => {
+            const kb = this.world?.keyboard;
+            if (!kb) return;
+
             if (this.isDead()) {
                 this.playAnimation(this.IMAGES_DEAD);
             } else if (this.isHurt()) {
@@ -129,15 +132,22 @@ class Character extends MovableObject {
             } else if (this.isAboveGround()) {
                 this.playAnimation(this.IMAGES_JUMPING);
             } else {
-                // Idle / Long Idle
-                let now = new Date().getTime();
-                let timeSinceMove = now - (this.lastMoveTime || now);
+                // Idle / Long Idle / Walking
+                const now = new Date().getTime();
+                const timeSinceMove = now - (this.lastMoveTime || now);
 
-                if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+                if (kb.RIGHT || kb.LEFT) {
+                    // Laufen nur bei Richtungstasten
                     this.playAnimation(this.IMAGES_WALKING);
+                } else if (kb.D) {
+                    // D gedrückt: keine Long-Idle, Timer wird frisch gehalten
+                    this.lastMoveTime = now;
+                    this.playAnimation(this.IMAGES_IDLE);
                 } else if (timeSinceMove > 3000) {
+                    // länger keine Aktivität → Long Idle
                     this.playAnimation(this.IMAGES_LONG_IDLE);
                 } else {
+                    // Standard → Idle
                     this.playAnimation(this.IMAGES_IDLE);
                 }
             }
