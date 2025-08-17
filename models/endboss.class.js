@@ -4,6 +4,10 @@ class Endboss extends MovableObject {
     width = 250;
     y = 55;
     dead = false;
+    inAlert = false;   // NEU
+    inAttack = false;  // NEU
+    moving = false;    // NEU
+    direction = -100;    // -1 = links, +1 = rechts
 
     IMAGES_WALKING = [
         'img/4_enemie_boss_chicken/1_walk/G1.png',
@@ -21,7 +25,7 @@ class Endboss extends MovableObject {
         'img/4_enemie_boss_chicken/2_alert/G10.png',
         'img/4_enemie_boss_chicken/2_alert/G11.png',
         'img/4_enemie_boss_chicken/2_alert/G12.png'
-    ]
+    ];
 
     IMAGES_ATTACK = [
         'img/4_enemie_boss_chicken/3_attack/G13.png',
@@ -50,23 +54,53 @@ class Endboss extends MovableObject {
     constructor() {
         super().loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
-        this.loadImages(this.IMAGES_HURT);   // NEU**
-        this.loadImages(this.IMAGES_DEAD);   // NEU**
+        this.loadImages(this.IMAGES_ALERT);
+        this.loadImages(this.IMAGES_ATTACK);
+        this.loadImages(this.IMAGES_HURT);
+        this.loadImages(this.IMAGES_DEAD);
         this.x = 2500;
         this.animate();
     }
 
+    startAlert() {
+        this.inAlert = true;
+        setTimeout(() => {
+            this.inAlert = false;
+            this.startMoving();
+        }, 1000); // 2 Sek. Alarm-Animation, danach Bewegung
+    }
+
+    startMoving() {
+        this.moving = true;
+    }
+
+    startAttack() {
+        this.inAttack = true;
+        setTimeout(() => this.inAttack = false, 1000); // Attack dauert 1 Sek.
+    }
+
     animate() {
         setInterval(() => {
-            if (this.dead) {                 // NEU
+            if (this.dead) {
                 this.playAnimation(this.IMAGES_DEAD);
                 return;
             }
-            if (this.isHurt()) {             // NEU
+            if (this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURT);
-            } else {
+            } else if (this.inAlert) {
+                this.playAnimation(this.IMAGES_ALERT);
+            } else if (this.inAttack) {
+                this.playAnimation(this.IMAGES_ATTACK);
+            } else if (this.moving) {
                 this.playAnimation(this.IMAGES_WALKING);
+                this.moveBetween();
             }
         }, 200);
+    }
+
+    moveBetween() {
+        this.x += this.speed * this.direction;
+        if (this.x <= 2000) this.direction = 10;
+        if (this.x >= 2500) this.direction = -10;
     }
 }

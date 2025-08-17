@@ -56,12 +56,17 @@ class World {
 
     run() {
         setInterval(() => {
-            // checkBottleHits hier entfernen**
             this.checkCollisions();
             this.checkThrowObjects();
-            // this.checkBottleHits();  // ENTFERNT**
+
+            // Endboss Trigger bei X >= 2000
+            let boss = this.level.enemies.find(e => e instanceof Endboss);
+            if (boss && !boss.inAlert && !boss.moving && this.character.x >= 2000) {
+                boss.startAlert();
+            }
         }, 200);
     }
+
 
 
     draw() {
@@ -125,15 +130,21 @@ class World {
 
 
     checkCollisions() {
-        // Gegner
         this.level.enemies.forEach((enemy) => {
             if (!enemy.dead && this.character.isColliding(enemy)) {
-                this.character.hit();
-                this.statusBar.setPercentage('health', this.character.energy);
+                if (enemy instanceof Endboss) {
+                    enemy.startAttack();   // Attack-Animation starten
+                    this.character.energy -= 20; // 20 % Schaden
+                    if (this.character.energy < 0) this.character.energy = 0;
+                    this.statusBar.setPercentage('health', this.character.energy);
+                } else {
+                    this.character.hit();
+                    this.statusBar.setPercentage('health', this.character.energy);
+                }
             }
         });
 
-        // Collectables
+        // Collectables (bleibt wie bisher)
         this.collectableObjects = this.collectableObjects.filter(obj => {
             if (this.character.isColliding(obj)) {
                 if (obj.type === 'coin') {
@@ -147,11 +158,12 @@ class World {
                         this.statusBar.setPercentage('bottles', bottlePercentage);
                     }
                 }
-                return false; // entfernt das eingesammelte Objekt
+                return false;
             }
             return true;
         });
     }
+
 
 
     // Beispiel: wenn ein Coin eingesammelt wird
