@@ -11,7 +11,7 @@ class World {
     coins = 0;
     bottles = 0;
     totalCoins = 10; // für Prozentberechnung
-    totalBottles = 5;
+    totalBottles = 10;
 
 
 
@@ -21,20 +21,22 @@ class World {
         this.canvas = canvas;
         this.keyboard = keyboard;
 
-        this.bottles = 0; // WICHTIG: Startwert 0
+        this.bottles = 0;
         this.coins = 0;
         this.totalCoins = 10;
-        this.totalBottles = 5;
+        this.totalBottles = 10;
 
         this.spawnCollectables();
+        this.spawnClouds();   // 🌥️ Clouds beim Start erzeugen
         this.draw();
         this.setWorld();
         this.run();
     }
 
+
     spawnCollectables() {
         // Zufällige Bottles
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10; i++) {
             let x = Math.random() * 2000 + 200;
             let y = 350; // Bottles bleiben fix
             this.collectableObjects.push(new CollectableObject('bottle', x, y));
@@ -153,9 +155,9 @@ class World {
                     let coinPercentage = Math.min((this.coins / 10) * 100, 100);
                     this.statusBar.setPercentage('coins', coinPercentage);
                 } else if (obj.type === 'bottle') {
-                    if (this.bottles < 5) {
+                    if (this.bottles < 10) {
                         this.bottles++;
-                        let bottlePercentage = (this.bottles / 5) * 100;
+                        let bottlePercentage = (this.bottles / 10) * 100;
                         this.statusBar.setPercentage('bottles', bottlePercentage);
                     }
                 }
@@ -187,8 +189,9 @@ class World {
             this.throwableObjects.push(bottle);
 
             this.bottles--;
-            let bottlePercentage = (this.bottles / 5) * 100;
+            let bottlePercentage = (this.bottles / this.totalBottles) * 100;  // ✅ dynamisch
             this.statusBar.setPercentage('bottles', bottlePercentage);
+
 
             // Kurzer Cooldown, damit nicht pro Frame eine geworfen wird
             this.throwCooldown = true;
@@ -228,5 +231,16 @@ class World {
         mo.x = mo.x * -1;
         this.ctx.restore();
     }
+
+    spawnClouds() {
+        // Canvas-Breite in Anzahl Clouds berechnen
+        let cloudsNeeded = Math.ceil(this.canvas.width / 500) + 3;
+        // +2 für Sicherheit (damit man keine Lücke sieht)
+
+        for (let i = 0; i < cloudsNeeded; i++) {
+            this.level.clouds.push(new Cloud());
+        }
+    }
+
 
 }
