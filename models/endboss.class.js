@@ -80,8 +80,9 @@ class Endboss extends MovableObject {
         setTimeout(() => {
             this.inAlert = false;
             this.startMoving();
-        }, 1000);
+        }, 2000); // etwas länger, damit man die Frames sieht
     }
+
 
     startMoving() {
         this.moving = true;
@@ -97,16 +98,17 @@ class Endboss extends MovableObject {
             // Während der Death-Sequenz keine normale Animation mehr
             if (this.dead) return;
 
-            if (this.isHurt()) {
-                this.playAnimation(this.IMAGES_HURT);
-            } else if (this.inAlert) {
+            if (this.inAlert) {
                 this.playAnimation(this.IMAGES_ALERT);
+            } else if (this.isHurt()) {
+                this.playAnimation(this.IMAGES_HURT);
             } else if (this.inAttack) {
                 this.playAnimation(this.IMAGES_ATTACK);
             } else if (this.moving) {
                 this.playAnimation(this.IMAGES_WALKING);
                 this.moveBetween();
             }
+
         }, 200);
     }
 

@@ -183,7 +183,8 @@ class World {
             if (!enemy.dead && this.character.isColliding(enemy)) {
                 if (enemy instanceof Endboss) {
                     enemy.startAttack();   // Attack-Animation starten
-                    this.character.energy -= 20; // 20 % Schaden
+                    this.character.hit();  // <-- sorgt für Hurt-Animation + lastHit
+                    this.character.energy -= 15; // extra Schaden (Endboss = härter)
                     if (this.character.energy < 0) this.character.energy = 0;
                     this.statusBar.setPercentage('health', this.character.energy);
                 } else {
@@ -191,6 +192,7 @@ class World {
                     this.statusBar.setPercentage('health', this.character.energy);
                 }
             }
+
         });
 
         // Collectables
