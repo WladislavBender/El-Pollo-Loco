@@ -136,7 +136,7 @@ class World {
         for (let i = 0; i < 10; i++) {
             let x = Math.random() * 2000 + 200;
             let baseY = 300;
-            let yOffset = Math.random() * 60 - 200;
+            let yOffset = Math.random() * 60 - 250;
             let y = baseY + yOffset;
             this.collectableObjects.push(new CollectableObject('coin', x, y));
         }

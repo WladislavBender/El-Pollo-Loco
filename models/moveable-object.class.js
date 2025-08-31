@@ -7,10 +7,8 @@ class MovableObject extends DrawableObject {
     energy = 100;
     lastHit = 0;
 
-
-
     isAboveGround() {
-        if (this instanceof ThrowableObject) { // ThrowableObjects should always fall
+        if (this instanceof ThrowableObject) {
             return true;
         } else {
             return this.y < 135;
@@ -18,73 +16,68 @@ class MovableObject extends DrawableObject {
     }
 
 
-    isColliding(mo) {
-        // Standard: Gegner / Character
-        let offsetX = 0;
-        let offsetYTop = 0;
-        let offsetYBottom = 0;
+    getCollisionBox() {
+        let x = this.x;
+        let y = this.y;
+        let w = this.width;
+        let h = this.height;
 
         if (this instanceof Character) {
-            offsetX = 20;
-            offsetYTop = 120;
-            offsetYBottom = 20;
+            let offsetX = 20;
+            let offsetYTop = 120;
+            let offsetYBottom = 20;
+
+            x = this.x + offsetX;
+            y = this.y + offsetYTop;
+            w = this.width - offsetX * 2;
+            h = this.height - offsetYTop - offsetYBottom;
         }
 
-        if (this instanceof Chicken) {
-            offsetX = 10;
-            offsetYTop = 10;
-            offsetYBottom = 10;
-        }
+        return { x, y, w, h };
+    }
 
-        let aX = this.x + offsetX;
-        let aY = this.y + offsetYTop;
-        let aW = this.width - offsetX * 2;
-        let aH = this.height - offsetYTop - offsetYBottom;
+    /**
+     * Kollisionsabfrage mit Gegnern
+     * - Character → roter Rahmen
+     * - Gegner → voller Rahmen
+     */
+    isColliding(mo) {
+        const a = this.getCollisionBox();
+        const b = mo.getCollisionBox ? mo.getCollisionBox() : { x: mo.x, y: mo.y, w: mo.width, h: mo.height };
 
         return (
-            aX + aW > mo.x &&
-            aX < mo.x + mo.width &&
-            aY + aH > mo.y &&
-            aY < mo.y + mo.height
+            a.x + a.w > b.x &&
+            a.x < b.x + b.w &&
+            a.y + a.h > b.y &&
+            a.y < b.y + b.h
         );
     }
 
-
+    /**
+     * Kollisionsabfrage mit Collectables (Coins, Bottles)
+     * - Character → roter Rahmen
+     * - Collectable → voller Rahmen
+     */
     isCollidingCollectable(mo) {
-        // Character soll IMMER mit seinem roten Rahmen geprüft werden
-        let offsetX = 20;
-        let offsetYTop = 120;
-        let offsetYBottom = 20;
+        const a = this.getCollisionBox(); // Character (roter Rahmen)
+        const b = { x: mo.x, y: mo.y, w: mo.width, h: mo.height }; // Collectable (voller Rahmen)
 
-        let aX = this.x + offsetX;
-        let aY = this.y + offsetYTop;
-        let aW = this.width - offsetX * 2;
-        let aH = this.height - offsetYTop - offsetYBottom;
-
-        // Collectables → voller äußerer Rahmen (kein Offset!)
         return (
-            aX + aW > mo.x &&
-            aX < mo.x + mo.width &&
-            aY + aH > mo.y &&
-            aY < mo.y + mo.height
+            a.x + a.w > b.x &&
+            a.x < b.x + b.w &&
+            a.y + a.h > b.y &&
+            a.y < b.y + b.h
         );
     }
 
-
-
-
-
-    // Optional aber sinnvoll (Timing): vorher 100/25 war 4ms
     applyGravity() {
         setInterval(() => {
             if (this.isAboveGround() || this.speedY > 0) {
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
             }
-        }, 100 / 25); // **ÄNDERUNG (optional)**
+        }, 100 / 25);
     }
-
-
 
     hit() {
         this.energy -= 5;
@@ -95,10 +88,9 @@ class MovableObject extends DrawableObject {
         }
     }
 
-
     isHurt() {
-        let timepassed = new Date().getTime() - this.lastHit; // Difference in ms
-        timepassed = timepassed / 1000; //Difference in s
+        let timepassed = new Date().getTime() - this.lastHit;
+        timepassed = timepassed / 1000;
         return timepassed < 1.5;
     }
 
@@ -106,10 +98,8 @@ class MovableObject extends DrawableObject {
         return this.energy == 0;
     }
 
-
     playAnimation(images) {
-        let i = this.currentImage % images.length; // let i = 0 % 6 => 1, Rest 1
-        // i = 0, 1, 2, 3, 4, 5, 6, 0
+        let i = this.currentImage % images.length;
         let path = images[i];
         this.img = this.imageCache[path];
         this.currentImage++;
@@ -118,7 +108,6 @@ class MovableObject extends DrawableObject {
     moveRight() {
         this.x += this.speed;
     }
-
 
     moveLeft() {
         this.x -= this.speed;
