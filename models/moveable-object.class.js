@@ -18,13 +18,61 @@ class MovableObject extends DrawableObject {
     }
 
 
-    // **ÄNDERUNG: echte Rechteck-Überlappung**
     isColliding(mo) {
-        return this.x + this.width > mo.x &&
-            this.x < mo.x + mo.width &&
-            this.y + this.height > mo.y &&
-            this.y < mo.y + mo.height;
+        // Standard: Gegner / Character
+        let offsetX = 0;
+        let offsetYTop = 0;
+        let offsetYBottom = 0;
+
+        if (this instanceof Character) {
+            offsetX = 20;
+            offsetYTop = 120;
+            offsetYBottom = 20;
+        }
+
+        if (this instanceof Chicken) {
+            offsetX = 10;
+            offsetYTop = 10;
+            offsetYBottom = 10;
+        }
+
+        let aX = this.x + offsetX;
+        let aY = this.y + offsetYTop;
+        let aW = this.width - offsetX * 2;
+        let aH = this.height - offsetYTop - offsetYBottom;
+
+        return (
+            aX + aW > mo.x &&
+            aX < mo.x + mo.width &&
+            aY + aH > mo.y &&
+            aY < mo.y + mo.height
+        );
     }
+
+
+    isCollidingCollectable(mo) {
+        // Character soll IMMER mit seinem roten Rahmen geprüft werden
+        let offsetX = 20;
+        let offsetYTop = 120;
+        let offsetYBottom = 20;
+
+        let aX = this.x + offsetX;
+        let aY = this.y + offsetYTop;
+        let aW = this.width - offsetX * 2;
+        let aH = this.height - offsetYTop - offsetYBottom;
+
+        // Collectables → voller äußerer Rahmen (kein Offset!)
+        return (
+            aX + aW > mo.x &&
+            aX < mo.x + mo.width &&
+            aY + aH > mo.y &&
+            aY < mo.y + mo.height
+        );
+    }
+
+
+
+
 
     // Optional aber sinnvoll (Timing): vorher 100/25 war 4ms
     applyGravity() {

@@ -136,7 +136,7 @@ class World {
         for (let i = 0; i < 10; i++) {
             let x = Math.random() * 2000 + 200;
             let baseY = 300;
-            let yOffset = Math.random() * 60 - 120;
+            let yOffset = Math.random() * 60 - 200;
             let y = baseY + yOffset;
             this.collectableObjects.push(new CollectableObject('coin', x, y));
         }
@@ -195,7 +195,7 @@ class World {
 
         // Collectables
         this.collectableObjects = this.collectableObjects.filter(obj => {
-            if (this.character.isColliding(obj)) {
+            if (this.character.isCollidingCollectable(obj)) {
                 if (obj.type === 'coin') {
                     this.coins++;
                     let coinPercentage = Math.min((this.coins / 10) * 100, 100);

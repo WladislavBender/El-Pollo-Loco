@@ -24,13 +24,44 @@ class DrawableObject {
 
     drawFrame(ctx) {
         if (this instanceof Character || this instanceof Chicken) {
+            // Äußerer Debug-Rahmen (blau)
             ctx.beginPath();
-            ctx.lineWidth = '5';
+            ctx.lineWidth = 3;
             ctx.strokeStyle = 'blue';
             ctx.rect(this.x, this.y, this.width, this.height);
             ctx.stroke();
+
+            // Klassenspezifische Offsets
+            let offsetX, offsetYTop, offsetYBottom;
+
+            if (this instanceof Character) {
+                offsetX = 20;
+                offsetYTop = 120;   // stark nach unten versetzt
+                offsetYBottom = 20; // unten nur wenig abgeschnitten
+            }
+
+            if (this instanceof Chicken) {
+                offsetX = 10;
+                offsetYTop = 10;    // fast volle Höhe
+                offsetYBottom = 10; // unten leicht gekürzt
+            }
+
+            const newX = this.x + offsetX;
+            const newY = this.y + offsetYTop;
+            const newW = this.width - offsetX * 2;
+            const newH = this.height - offsetYTop - offsetYBottom;
+
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'red';
+            ctx.rect(newX, newY, newW, newH);
+            ctx.stroke();
         }
     }
+
+
+
+
 
 
 
