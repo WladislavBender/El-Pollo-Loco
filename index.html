@@ -31,6 +31,9 @@
         <h1>El Pollo Loco</h1>
         <canvas id="canvas" width="720" height="480"></canvas>
 
+        <!-- Button im Canvas-Bereich -->
+        <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
         <!-- Startbildschirm -->
         <div id="start-screen">
             <div class="overlay-content">
@@ -41,11 +44,9 @@
         <!-- Endscreen -->
         <div id="end-screen" class="hidden">
             <div class="overlay-content">
-                <button id="restart-btn">Restart</button>
+                <button id="restart-btn" onclick="restartGame()">Restart</button>
             </div>
         </div>
-
-
     </div>
 
 

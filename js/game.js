@@ -9,9 +9,54 @@ function init() {
 }
 
 function restartGame() {
-    // kompletter Neustart ist am einfachsten und sichersten
-    window.location.reload();
+    // Canvas löschen
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Neues Level laden
+    initLevel();
+
+    // Neue World erstellen
+    world = new World(canvas, keyboard);
+
+    // Endscreen wieder ausblenden
+    const endScreen = document.getElementById("end-screen");
+    endScreen.classList.remove("show");
+    endScreen.classList.add("hidden");
+
+    console.log("Neues Spiel gestartet");
 }
+
+
+function toggleFullscreen() {
+    const content = document.getElementById("content");
+    const title = document.querySelector("#content h1");
+
+    if (!document.fullscreenElement) {
+        // Container mit Canvas + Overlays ins Vollbild
+        content.requestFullscreen().catch(err => {
+            console.error(`Fullscreen-Fehler: ${err.message}`);
+        });
+        if (title) title.style.display = "none";
+    } else {
+        // Vollbild verlassen
+        document.exitFullscreen();
+        // (title wird über fullscreenchange wieder eingeblendet)
+    }
+}
+
+// Event, das aufgerufen wird, wenn Fullscreen an- oder ausgeschaltet wird
+document.addEventListener("fullscreenchange", () => {
+    const title = document.querySelector("#content h1");
+    if (!document.fullscreenElement && title) {
+        title.style.display = "block";
+    }
+});
+
+
+
+
+
 
 // Start-Button Event
 window.addEventListener("DOMContentLoaded", () => {
