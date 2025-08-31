@@ -247,40 +247,22 @@ class World {
     }
 
     drawEndScreen() {
-        // Canvas leeren
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        const endScreen = document.getElementById("end-screen");
 
-        // Endscreen-Bild laden
-        const img = new Image();
-        img.src = this.gameWon
-            ? 'img/You won, you lost/You won A.png'
-            : 'img/You won, you lost/You lost.png';
+        // Hintergrundbild je nach Ergebnis setzen
+        endScreen.style.backgroundImage = this.gameWon
+            ? "url('img/You won, you lost/You won A.png')"
+            : "url('img/You won, you lost/You lost.png')";
 
-        img.onload = () => {
-            // Volle Canvas-Größe befüllen
-            this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+        // Endscreen sichtbar machen
+        endScreen.classList.remove("hidden");
 
-            // Button zeichnen (unten mittig)
-            const btnW = 160;
-            const btnH = 56;
-            const btnX = this.canvas.width / 2 - btnW / 2;
-            const btnY = this.canvas.height - 100;
-
-            // Hintergrund
-            this.ctx.fillStyle = "rgba(255,255,255,0.9)";
-            this.ctx.fillRect(btnX, btnY, btnW, btnH);
-
-            // Text
-            this.ctx.fillStyle = "black";
-            this.ctx.font = "20px Arial";
-            this.ctx.textAlign = "center";
-            this.ctx.textBaseline = "middle";
-            this.ctx.fillText("Restart", this.canvas.width / 2, btnY + btnH / 2);
-
-            // Klick-Handler aktivieren
-            this.canvas.addEventListener("click", this.handleRestartClick);
-        };
+        // Restart-Button aktivieren
+        const restartBtn = document.getElementById("restart-btn");
+        restartBtn.onclick = () => restartGame();
     }
+
+
 
     // Klick auf Canvas-Button (mit CSS-Scaling-Korrektur)
     handleRestartClick = (event) => {
