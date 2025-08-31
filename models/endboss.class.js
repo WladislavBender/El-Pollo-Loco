@@ -75,13 +75,13 @@ class Endboss extends MovableObject {
         this.lastHit = new Date().getTime();
     }
 
-    startAlert() {
-        this.inAlert = true;
-        setTimeout(() => {
-            this.inAlert = false;
-            this.startMoving();
-        }, 2000); // etwas länger, damit man die Frames sieht
-    }
+  startAlert() {
+    this.inAlert = true;
+    setTimeout(() => {
+        this.inAlert = false;
+        this.startMoving();
+    }, 1500); // etwas länger, damit man die Frames sieht
+}
 
 
     startMoving() {
