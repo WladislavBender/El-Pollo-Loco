@@ -70,27 +70,39 @@ body {
 
 #end-screen {
     position: absolute;
-    top: 166px;              
+    top: 166px;
     left: 0;
-    width: 720px;            
+    width: 720px;
     height: 480px;
-    background: rgba(0, 0, 0, 0.8); 
+    background: rgba(0, 0, 0, 0.8);
     background-repeat: no-repeat;
-    background-size: contain;   /* Bild skaliert rein, bleibt komplett sichtbar */
+    background-size: contain;
     background-position: center;
     border: 6px solid white;
     display: flex;
     justify-content: center;
-    align-items: flex-end;     
-    padding-bottom: 40px;      
+    align-items: flex-end;
+    padding-bottom: 40px;
     z-index: 10;
+
+    opacity: 0;
+    /* unsichtbar am Anfang */
+    pointer-events: none;
+    transition: opacity 0.8s ease-in;
+    /* sanftes Einblenden */
 }
+
+#end-screen.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 
 #end-screen.hidden {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
 }
-
-
 
 #end-screen img {
     max-width: 100%;

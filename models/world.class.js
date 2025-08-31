@@ -21,7 +21,6 @@ class World {
     animationFrame = null;
     throwCooldown = false;
 
-    // Im World-Konstruktor gleich initialisieren
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
@@ -58,13 +57,13 @@ class World {
                 boss.startAlert();
             }
 
-            // === Sieg/Niederlage prüfen ===
+            // === Niederlage prüfen ===
             if (!this.gameOver && this.character.isDead()) {
                 this.endGame(false); // verloren
             }
-            if (!this.gameOver && boss && boss.isDead()) {
-                this.endGame(true); // gewonnen
-            }
+
+            // ❌ WICHTIG: KEIN Sofort-Win mehr hier!
+            // Der Sieg wird NUR in der Death-Animation des Bosses getriggert.
         }, 200);
     }
 
@@ -102,7 +101,7 @@ class World {
     addToMap(mo) {
         if (mo.otherDirection) this.flipImage(mo);
         mo.draw(this.ctx);
-        mo.drawFrame(this.ctx); // (dein Debug-Frame; gern auskommentieren)
+        mo.drawFrame(this.ctx); // Debug-Frame (optional)
         if (mo.otherDirection) this.flipImageBack(mo);
     }
 
@@ -162,11 +161,13 @@ class World {
                         enemy.hit(); // 20 dmg + lastHit
                         this.statusBar.setPercentage('endboss', enemy.energy);
 
-                        if (enemy.isDead() && !this.gameOver) {
-                            enemy.dead = true;
-                            enemy.speed = 0;
-                            // sofort Win anzeigen (nicht erst 200ms warten)
-                            this.endGame(true);
+                        // Wenn Boss jetzt "tot" ist → Death-Sequenz starten (nur einmal)
+                        if (enemy.isDead() && !enemy.deathSequenceStarted) {
+                            enemy.startDeath(() => {
+                                if (!this.gameOver) {
+                                    this.endGame(true); // Endscreen NACH der Animation
+                                }
+                            });
                         }
                     }
 
@@ -254,15 +255,14 @@ class World {
             ? "url('img/You won, you lost/You won A.png')"
             : "url('img/You won, you lost/You lost.png')";
 
-        // Endscreen sichtbar machen
+        // Endscreen sichtbar machen + Effekt starten
         endScreen.classList.remove("hidden");
+        endScreen.classList.add("show");
 
         // Restart-Button aktivieren
         const restartBtn = document.getElementById("restart-btn");
         restartBtn.onclick = () => restartGame();
     }
-
-
 
     // Klick auf Canvas-Button (mit CSS-Scaling-Korrektur)
     handleRestartClick = (event) => {
