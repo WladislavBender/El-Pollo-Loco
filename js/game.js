@@ -5,93 +5,81 @@ let keyboard = new Keyboard();
 function init() {
     canvas = document.getElementById('canvas');
     world = new World(canvas, keyboard);
-    console.log('My Character is', world.character);
 }
 
 function restartGame() {
-    // Canvas löschen
+    clearCanvas();
+    initLevel();
+    world = new World(canvas, keyboard);
+    hideEndScreen();
+}
+
+function clearCanvas() {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
-    // Neues Level laden
-    initLevel();
-
-    // Neue World erstellen
-    world = new World(canvas, keyboard);
-
-    // Endscreen wieder ausblenden
+function hideEndScreen() {
     const endScreen = document.getElementById("end-screen");
     endScreen.classList.remove("show");
     endScreen.classList.add("hidden");
-
-    console.log("Neues Spiel gestartet");
 }
-
 
 function toggleFullscreen() {
     const content = document.getElementById("content");
     const title = document.querySelector("#content h1");
-
-    if (!document.fullscreenElement) {
-        // Container mit Canvas + Overlays ins Vollbild
-        content.requestFullscreen().catch(err => {
-            console.error(`Fullscreen-Fehler: ${err.message}`);
-        });
-        if (title) title.style.display = "none";
-    } else {
-        // Vollbild verlassen
+    if (isFullscreen()) {
         document.exitFullscreen();
-        // (title wird über fullscreenchange wieder eingeblendet)
+    } else {
+        enterFullscreen(content, title);
     }
 }
 
-// Event, das aufgerufen wird, wenn Fullscreen an- oder ausgeschaltet wird
+function isFullscreen() {
+    return document.fullscreenElement;
+}
+
+function enterFullscreen(content, title) {
+    content.requestFullscreen().catch(err => console.error(`Fullscreen-Fehler: ${err.message}`));
+    if (title) title.style.display = "none";
+}
+
 document.addEventListener("fullscreenchange", () => {
     const title = document.querySelector("#content h1");
-    if (!document.fullscreenElement && title) {
-        title.style.display = "block";
-    }
+    if (!isFullscreen() && title) showTitle(title);
 });
 
+function showTitle(title) {
+    title.style.display = "block";
+}
 
-
-
-
-
-// Start-Button Event
-window.addEventListener("DOMContentLoaded", () => {
-    const startBtn = document.getElementById("start-btn");
+function startGame() {
     const startScreen = document.getElementById("start-screen");
+    initLevel();
+    init();
+    fadeOutStartScreen(startScreen);
+}
 
-    startBtn.addEventListener("click", () => {
-        // 1. Level initialisieren
-        initLevel();
+function fadeOutStartScreen(startScreen) {
+    startScreen.classList.add("fade-out");
+    setTimeout(() => startScreen.remove(), 1000);
+}
 
-        // 2. Spiel starten
-        init();
+window.addEventListener("keydown", (event) => handleKey(event, true));
+window.addEventListener("keyup", (event) => handleKey(event, false));
 
-        // Overlay ausblenden mit Animation
-        startScreen.classList.add("fade-out");
+function handleKey(event, isPressed) {
+    if (isRight(event)) keyboard.RIGHT = isPressed;
+    if (isLeft(event)) keyboard.LEFT = isPressed;
+    if (isUp(event)) keyboard.UP = isPressed;
+    if (isDown(event)) keyboard.DOWN = isPressed;
+    if (isSpace(event)) keyboard.SPACE = isPressed;
+    if (isThrow(event)) keyboard.D = isPressed;
+}
 
-        // Optional: nach Animation aus dem DOM entfernen
-        setTimeout(() => startScreen.remove(), 1000);
-    });
-});
-
-window.addEventListener("keydown", (event) => {
-    if (event.keyCode == 39) keyboard.RIGHT = true;
-    if (event.keyCode == 37) keyboard.LEFT = true;
-    if (event.keyCode == 38) keyboard.UP = true;
-    if (event.keyCode == 40) keyboard.DOWN = true;
-    if (event.keyCode == 32) keyboard.SPACE = true;
-    if (event.keyCode == 68) keyboard.D = true;
-});
-
-window.addEventListener("keyup", (event) => {
-    if (event.keyCode == 39) keyboard.RIGHT = false;
-    if (event.keyCode == 37) keyboard.LEFT = false;
-    if (event.keyCode == 38) keyboard.UP = false;
-    if (event.keyCode == 40) keyboard.DOWN = false;
-    if (event.keyCode == 32) keyboard.SPACE = false;
-    if (event.keyCode == 68) keyboard.D = false;
-});
+function isRight(event) { return event.keyCode === 39; }
+function isLeft(event) { return event.keyCode === 37; }
+function isUp(event) { return event.keyCode === 38; }
+function isDown(event) { return event.keyCode === 40; }
+function isSpace(event) { return event.keyCode === 32; }
+function isThrow(event) { return event.keyCode === 68; }

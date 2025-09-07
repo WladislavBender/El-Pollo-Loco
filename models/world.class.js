@@ -8,13 +8,10 @@ class World {
     statusBar = new StatusBar();
     throwableObjects = [];
     collectableObjects = [];
-
     coins = 0;
     bottles = 0;
-    totalCoins = 10;   // für Prozentberechnung
-    totalBottles = 10; // für Prozentberechnung
-
-    // Endscreen / Loop-Steuerung
+    totalCoins = 10;
+    totalBottles = 10;
     gameOver = false;
     gameWon = false;
     gameInterval = null;
@@ -25,18 +22,19 @@ class World {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
+        this.resetCollectables();
+        this.spawnCollectables();
+        this.spawnClouds();
+        this.setWorld();
+        this.draw();
+        this.run();
+    }
 
+    resetCollectables() {
         this.bottles = 0;
         this.coins = 0;
         this.totalCoins = 10;
         this.totalBottles = 10;
-
-        this.spawnCollectables();
-        this.spawnClouds();
-        this.setWorld();
-
-        this.draw();
-        this.run();
     }
 
     setWorld() {
@@ -44,54 +42,52 @@ class World {
     }
 
     run() {
-        // Wichtig: Handle speichern, damit wir stoppen können
         this.gameInterval = setInterval(() => {
-            if (this.gameOver) return;
-
+            if (this.isGameOver()) return;
             this.checkCollisions();
             this.checkThrowObjects();
-
-            // Endboss Trigger bei X >= 2000
-            let boss = this.level.enemies.find(e => e instanceof Endboss);
-            if (boss && !boss.inAlert && !boss.moving && this.character.x >= 2000) {
-                boss.startAlert();
-            }
-
-            // === Niederlage prüfen ===
-            if (!this.gameOver && this.character.isDead()) {
-                this.endGame(false); // verloren
-            }
-
-            // ❌ WICHTIG: KEIN Sofort-Win mehr hier!
-            // Der Sieg wird NUR in der Death-Animation des Bosses getriggert.
+            this.triggerEndboss();
+            this.checkImmediateDefeat();
         }, 200);
     }
 
+    isGameOver() {
+        return this.gameOver;
+    }
+
+    triggerEndboss() {
+        let boss = this.level.enemies.find(e => e instanceof Endboss);
+        if (boss && !boss.inAlert && !boss.moving && this.character.x >= 2000) {
+            boss.startAlert();
+        }
+    }
+
+    checkImmediateDefeat() {
+        if (!this.gameOver && this.character.isDead()) {
+            this.endGame(false);
+        }
+    }
+
     draw() {
-        if (this.gameOver) return; // kein normales Redraw mehr, Endscreen übernimmt
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (this.isGameOver()) return;
+        this.clearCanvas();
         this.ctx.translate(this.camera_x, 0);
-
         this.addObjectsToMap(this.level.backgroundObjects);
-
         this.ctx.translate(-this.camera_x, 0);
         this.addToMap(this.statusBar);
         this.ctx.translate(this.camera_x, 0);
-
-        // pro Frame auf Flaschen-Treffer prüfen
         this.checkBottleHits();
-
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.collectableObjects);
         this.addObjectsToMap(this.throwableObjects);
-
         this.ctx.translate(-this.camera_x, 0);
-
-        // Handle speichern, damit cancelAnimationFrame greift
         this.animationFrame = requestAnimationFrame(() => this.draw());
+    }
+
+    clearCanvas() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     addObjectsToMap(objects) {
@@ -99,10 +95,14 @@ class World {
     }
 
     addToMap(mo) {
-        if (mo.otherDirection) this.flipImage(mo);
+        if (this.isOtherDirection(mo)) this.flipImage(mo);
         mo.draw(this.ctx);
-        mo.drawFrame(this.ctx); // Debug-Frame (optional)
-        if (mo.otherDirection) this.flipImageBack(mo);
+        mo.drawFrame(this.ctx);
+        if (this.isOtherDirection(mo)) this.flipImageBack(mo);
+    }
+
+    isOtherDirection(mo) {
+        return mo.otherDirection;
     }
 
     flipImage(mo) {
@@ -118,7 +118,6 @@ class World {
     }
 
     spawnClouds() {
-        // Canvas-Breite in Anzahl Clouds berechnen
         let cloudsNeeded = Math.ceil(this.canvas.width / 500) + 3;
         for (let i = 0; i < cloudsNeeded; i++) {
             this.level.clouds.push(new Cloud());
@@ -126,163 +125,180 @@ class World {
     }
 
     spawnCollectables() {
-        // Zufällige Bottles
         for (let i = 0; i < 10; i++) {
             let x = Math.random() * 2000 + 200;
-            let y = 350; // Bottles bleiben fix
+            let y = 350;
             this.collectableObjects.push(new CollectableObject('bottle', x, y));
         }
-        // Zufällige Coins mit y-Variation
         for (let i = 0; i < 10; i++) {
             let x = Math.random() * 2000 + 200;
-            let baseY = 300;
-            let yOffset = Math.random() * 60 - 250;
-            let y = baseY + yOffset;
+            let y = 300 + (Math.random() * 60 - 250);
             this.collectableObjects.push(new CollectableObject('coin', x, y));
         }
     }
 
     checkBottleHits() {
-        // Falls Game Over/Win bereits erreicht, keine weiteren Treffer verarbeiten
-        if (this.gameOver) return;
-
+        if (this.isGameOver()) return;
         this.throwableObjects.forEach((bottle, bottleIndex) => {
             this.level.enemies.forEach((enemy, enemyIndex) => {
-                if (!enemy.dead && bottle.isColliding(enemy)) {
-
-                    if (enemy instanceof Chicken) {
-                        enemy.dead = true;
-                        enemy.loadImage(enemy.IMAGE_DEAD[0]);
-                        enemy.speed = 0;
-                        setTimeout(() => this.level.enemies.splice(enemyIndex, 1), 200);
-                    }
-
-                    if (enemy instanceof Endboss) {
-                        enemy.hit(); // 20 dmg + lastHit
-                        this.statusBar.setPercentage('endboss', enemy.energy);
-
-                        // Wenn Boss jetzt "tot" ist → Death-Sequenz starten (nur einmal)
-                        if (enemy.isDead() && !enemy.deathSequenceStarted) {
-                            enemy.startDeath(() => {
-                                if (!this.gameOver) {
-                                    this.endGame(true); // Endscreen NACH der Animation
-                                }
-                            });
-                        }
-                    }
-
-                    // Flasche nach Treffer entfernen
-                    this.throwableObjects.splice(bottleIndex, 1);
+                if (this.isBottleHit(bottle, enemy)) {
+                    this.handleEnemyHit(enemy, enemyIndex);
+                    this.removeBottle(bottleIndex);
                 }
             });
         });
     }
 
+    isBottleHit(bottle, enemy) {
+        return !enemy.dead && bottle.isColliding(enemy);
+    }
+
+    handleEnemyHit(enemy, enemyIndex) {
+        if (enemy instanceof Chicken) this.killChicken(enemy, enemyIndex);
+        if (enemy instanceof Endboss) this.hitEndboss(enemy);
+    }
+
+    killChicken(enemy, enemyIndex) {
+        enemy.dead = true;
+        enemy.loadImage(enemy.IMAGE_DEAD[0]);
+        enemy.speed = 0;
+        setTimeout(() => this.level.enemies.splice(enemyIndex, 1), 200);
+    }
+
+    hitEndboss(enemy) {
+        enemy.hit();
+        this.statusBar.setPercentage('endboss', enemy.energy);
+        if (enemy.isDead() && !enemy.deathSequenceStarted) {
+            enemy.startDeath(() => {
+                if (!this.isGameOver()) this.endGame(true);
+            });
+        }
+    }
+
+    removeBottle(bottleIndex) {
+        this.throwableObjects.splice(bottleIndex, 1);
+    }
+
     checkCollisions() {
-        this.level.enemies.forEach((enemy) => {
-            if (!enemy.dead && this.character.isColliding(enemy)) {
-                if (enemy instanceof Endboss) {
-                    enemy.startAttack();   // Attack-Animation starten
-                    this.character.hit();  // <-- sorgt für Hurt-Animation + lastHit
-                    this.character.energy -= 15; // extra Schaden (Endboss = härter)
-                    if (this.character.energy < 0) this.character.energy = 0;
-                    this.statusBar.setPercentage('health', this.character.energy);
-                } else {
-                    this.character.hit();
-                    this.statusBar.setPercentage('health', this.character.energy);
-                }
+        this.level.enemies.forEach(enemy => {
+            if (this.isEnemyCollision(enemy)) {
+                this.handleEnemyCollision(enemy);
             }
-
         });
+        this.collectableObjects = this.collectableObjects.filter(obj => !this.collectItem(obj));
+        this.checkImmediateDefeat();
+    }
 
-        // Collectables
-        this.collectableObjects = this.collectableObjects.filter(obj => {
-            if (this.character.isCollidingCollectable(obj)) {
-                if (obj.type === 'coin') {
-                    this.coins++;
-                    let coinPercentage = Math.min((this.coins / 10) * 100, 100);
-                    this.statusBar.setPercentage('coins', coinPercentage);
-                } else if (obj.type === 'bottle') {
-                    if (this.bottles < 10) {
-                        this.bottles++;
-                        let bottlePercentage = (this.bottles / this.totalBottles) * 100;
-                        this.statusBar.setPercentage('bottles', bottlePercentage);
-                    }
-                }
-                return false; // eingesammelt → entfernen
-            }
-            return true;
-        });
+    isEnemyCollision(enemy) {
+        return !enemy.dead && this.character.isColliding(enemy);
+    }
 
-        // Niederlage schon hier abfangen (sofortigeres Feedback)
-        if (!this.gameOver && this.character.isDead()) {
-            this.endGame(false);
+    handleEnemyCollision(enemy) {
+        if (enemy instanceof Endboss) {
+            enemy.startAttack();
+            this.character.hit();
+            this.character.energy = Math.max(this.character.energy - 15, 0);
+            this.statusBar.setPercentage('health', this.character.energy);
+        } else {
+            this.character.hit();
+            this.statusBar.setPercentage('health', this.character.energy);
+        }
+    }
+
+    collectItem(obj) {
+        if (!this.character.isCollidingCollectable(obj)) return false;
+        if (obj.type === 'coin') this.collectCoin();
+        if (obj.type === 'bottle') this.collectBottle();
+        return true;
+    }
+
+    collectCoin() {
+        this.coins++;
+        let coinPercentage = Math.min((this.coins / this.totalCoins) * 100, 100);
+        this.statusBar.setPercentage('coins', coinPercentage);
+    }
+
+    collectBottle() {
+        if (this.bottles < this.totalBottles) {
+            this.bottles++;
+            let bottlePercentage = (this.bottles / this.totalBottles) * 100;
+            this.statusBar.setPercentage('bottles', bottlePercentage);
         }
     }
 
     checkThrowObjects() {
-        // Prüfen, ob Flaschen vorhanden sind und Taste nur einmal erkannt wird
-        if (this.keyboard.D && this.bottles > 0 && !this.throwCooldown) {
-            let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
-            this.throwableObjects.push(bottle);
-
-            this.bottles--;
-            let bottlePercentage = (this.bottles / this.totalBottles) * 100;
-            this.statusBar.setPercentage('bottles', bottlePercentage);
-
-            // Kurzer Cooldown, damit nicht pro Frame eine geworfen wird
-            this.throwCooldown = true;
-            setTimeout(() => this.throwCooldown = false, 300);
+        if (this.canThrowBottle()) {
+            this.throwBottle();
+            this.updateBottleStatus();
+            this.startThrowCooldown();
         }
     }
 
+    canThrowBottle() {
+        return this.keyboard.D && this.bottles > 0 && !this.throwCooldown;
+    }
+
+    throwBottle() {
+        let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+        this.throwableObjects.push(bottle);
+        this.bottles--;
+    }
+
+    updateBottleStatus() {
+        let bottlePercentage = (this.bottles / this.totalBottles) * 100;
+        this.statusBar.setPercentage('bottles', bottlePercentage);
+    }
+
+    startThrowCooldown() {
+        this.throwCooldown = true;
+        setTimeout(() => this.throwCooldown = false, 300);
+    }
+
     endGame(won) {
-        if (this.gameOver) return; // nur einmal ausführen
+        if (this.isGameOver()) return;
         this.gameOver = true;
         this.gameWon = won;
-
         if (this.gameInterval) clearInterval(this.gameInterval);
         if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
-
-        // Zeichne den Endscreen im Canvas
-        // (kleiner Delay, damit evtl. letzte Sprites fertig sind)
         setTimeout(() => this.drawEndScreen(), 50);
     }
 
     drawEndScreen() {
         const endScreen = document.getElementById("end-screen");
-
-        // Hintergrundbild je nach Ergebnis setzen
-        endScreen.style.backgroundImage = this.gameWon
-            ? "url('img/You won, you lost/You won A.png')"
-            : "url('img/You won, you lost/You lost.png')";
-
-        // Endscreen sichtbar machen + Effekt starten
+        endScreen.style.backgroundImage = this.getEndscreenImage();
         endScreen.classList.remove("hidden");
         endScreen.classList.add("show");
-
-        // Restart-Button aktivieren
-        const restartBtn = document.getElementById("restart-btn");
-        restartBtn.onclick = () => restartGame();
+        document.getElementById("restart-btn").onclick = () => restartGame();
     }
 
-    // Klick auf Canvas-Button (mit CSS-Scaling-Korrektur)
+    getEndscreenImage() {
+        return this.gameWon
+            ? "url('img/You won, you lost/You won A.png')"
+            : "url('img/You won, you lost/You lost.png')";
+    }
+
     handleRestartClick = (event) => {
-        const rect = this.canvas.getBoundingClientRect();
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
-
-        const x = (event.clientX - rect.left) * scaleX;
-        const y = (event.clientY - rect.top) * scaleY;
-
-        const btnW = 160;
-        const btnH = 56;
-        const btnX = this.canvas.width / 2 - btnW / 2;
-        const btnY = this.canvas.height - 100;
-
-        if (x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
+        const { x, y } = this.getClickCoordinates(event);
+        if (this.isInsideRestartButton(x, y)) {
             this.canvas.removeEventListener("click", this.handleRestartClick);
             restartGame();
         }
     };
+
+    getClickCoordinates(event) {
+        const rect = this.canvas.getBoundingClientRect();
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        return {
+            x: (event.clientX - rect.left) * scaleX,
+            y: (event.clientY - rect.top) * scaleY
+        };
+    }
+
+    isInsideRestartButton(x, y) {
+        const btnW = 160, btnH = 56;
+        const btnX = this.canvas.width / 2 - btnW / 2;
+        const btnY = this.canvas.height - 100;
+        return x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH;
+    }
 }

@@ -1,5 +1,4 @@
 class Endboss extends MovableObject {
-
     height = 400;
     width = 250;
     y = 55;
@@ -8,9 +7,7 @@ class Endboss extends MovableObject {
     inAttack = false;
     moving = false;
     direction = -100;
-    energy = 100; // 5 Treffer à 20%
-
-    // Steuerung für Death-Sequenz
+    energy = 100;
     deathSequenceStarted = false;
     deathAnimationPlayed = false;
 
@@ -52,37 +49,34 @@ class Endboss extends MovableObject {
     IMAGES_DEAD = [
         'img/4_enemie_boss_chicken/5_dead/G24.png',
         'img/4_enemie_boss_chicken/5_dead/G25.png',
-        'img/4_enemie_boss_chicken/5_dead/G26.png',
+        'img/4_enemie_boss_chicken/5_dead/G26.png'
     ];
 
     constructor() {
-        super(); // erst super(), dann this.*
+        super();
         this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_ALERT);
         this.loadImages(this.IMAGES_ATTACK);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_DEAD);
-
         this.x = 2500;
         this.animate();
     }
 
-    // Boss nimmt 20 Schaden pro Flasche + setzt lastHit (triggert Hurt-Anim)
     hit() {
         this.energy -= 20;
         if (this.energy < 0) this.energy = 0;
         this.lastHit = new Date().getTime();
     }
 
-  startAlert() {
-    this.inAlert = true;
-    setTimeout(() => {
-        this.inAlert = false;
-        this.startMoving();
-    }, 1500); // etwas länger, damit man die Frames sieht
-}
-
+    startAlert() {
+        this.inAlert = true;
+        setTimeout(() => {
+            this.inAlert = false;
+            this.startMoving();
+        }, 1500);
+    }
 
     startMoving() {
         this.moving = true;
@@ -93,48 +87,58 @@ class Endboss extends MovableObject {
         setTimeout(() => this.inAttack = false, 1000);
     }
 
+    isDead() {
+        return this.energy <= 0 || this.dead;
+    }
+
+    isInAlert() {
+        return this.inAlert;
+    }
+
+    isInAttack() {
+        return this.inAttack;
+    }
+
+    isMoving() {
+        return this.moving;
+    }
+
     animate() {
         setInterval(() => {
-            // Während der Death-Sequenz keine normale Animation mehr
-            if (this.dead) return;
-
-            if (this.inAlert) {
-                this.playAnimation(this.IMAGES_ALERT);
-            } else if (this.isHurt()) {
-                this.playAnimation(this.IMAGES_HURT);
-            } else if (this.inAttack) {
-                this.playAnimation(this.IMAGES_ATTACK);
-            } else if (this.moving) {
+            if (this.isDead()) return;
+            if (this.isInAlert()) this.playAnimation(this.IMAGES_ALERT);
+            else if (this.isHurt()) this.playAnimation(this.IMAGES_HURT);
+            else if (this.isInAttack()) this.playAnimation(this.IMAGES_ATTACK);
+            else if (this.isMoving()) {
                 this.playAnimation(this.IMAGES_WALKING);
                 this.moveBetween();
             }
-
         }, 200);
     }
 
     moveBetween() {
         this.x += this.speed * this.direction;
-        if (this.x <= 2000) this.direction = 10;
-        if (this.x >= 2500) this.direction = -10;
+        if (this.isAtLeftBoundary()) this.direction = 10;
+        if (this.isAtRightBoundary()) this.direction = -10;
     }
 
-    /**
-     * Startet die Death-Sequenz (nur einmal). Stoppt alle anderen Zustände,
-     * spielt die Dead-Frames genau einmal durch und ruft danach onFinished().
-     */
+    isAtLeftBoundary() {
+        return this.x <= 2000;
+    }
+
+    isAtRightBoundary() {
+        return this.x >= 2500;
+    }
+
     startDeath(onFinished) {
         if (this.deathSequenceStarted) return;
         this.deathSequenceStarted = true;
-
-        // Zustand einfrieren
         this.dead = true;
         this.speed = 0;
         this.inAlert = false;
         this.inAttack = false;
         this.moving = false;
         this.direction = 0;
-
-        // Death-Animation einmalig abspielen
         this.playDeathAnimation(onFinished);
     }
 
@@ -144,22 +148,16 @@ class Endboss extends MovableObject {
             return;
         }
         this.deathAnimationPlayed = true;
-
         let i = 0;
-        const frameTime = 200; // ms pro Frame (wie deine anderen Animationen)
+        const frameTime = 200;
         const interval = setInterval(() => {
-            // Schutz: Falls Bilder noch nicht geladen, trotzdem wechseln
             const path = this.IMAGES_DEAD[i];
             this.img = this.imageCache[path] || this.img;
-
             i++;
             if (i >= this.IMAGES_DEAD.length) {
                 clearInterval(interval);
-                // auf letztem Frame stehen bleiben
                 const lastPath = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
                 this.img = this.imageCache[lastPath] || this.img;
-
-                // ganz kleiner Puffer, damit das letzte Frame sicher gerendert wurde
                 setTimeout(() => onFinished && onFinished(), 50);
             }
         }, frameTime);

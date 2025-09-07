@@ -8,40 +8,44 @@ class Cloud extends MovableObject {
         'img/5_background/layers/4_clouds/2.png'
     ];
 
-    static nextImageIndex = 0;    // Welches Bild ist als nächstes dran?
-    static lastX = 0;             // Merkt sich die rechte Kante der letzten Cloud
+    static nextImageIndex = 0;
+    static lastX = 0;
 
     constructor() {
         super();
         this.loadImages(this.IMAGES_CLOUDS);
+        this.setInitialImage();
+        this.setInitialPosition();
+        this.animate();
+    }
 
-        // Bild abwechselnd wählen (1.png, 2.png, 1.png, 2.png …)
+    setInitialImage() {
         let imageIndex = Cloud.nextImageIndex % this.IMAGES_CLOUDS.length;
         this.loadImage(this.IMAGES_CLOUDS[imageIndex]);
         Cloud.nextImageIndex++;
+    }
 
-        // Position direkt rechts neben der letzten Cloud
+    setInitialPosition() {
         this.x = Cloud.lastX;
         Cloud.lastX += this.width;
-
-        this.animate();
     }
 
     animate() {
         setInterval(() => {
             this.moveLeft();
-
-            // Wenn die Cloud ganz aus dem Bild raus ist →
-            // wieder rechts anhängen für Endlos-Schleife
-            if (this.x + this.width < 0) {
-                this.x = Cloud.lastX;
-                Cloud.lastX += this.width;
-
-                // Beim Recycling auch Bild abwechseln
-                let imageIndex = Cloud.nextImageIndex % this.IMAGES_CLOUDS.length;
-                this.loadImage(this.IMAGES_CLOUDS[imageIndex]);
-                Cloud.nextImageIndex++;
+            if (this.isOutOfView()) {
+                this.recycleCloud();
             }
-        }, 1000 / 60); // 60 FPS
+        }, 1000 / 60);
+    }
+
+    isOutOfView() {
+        return this.x + this.width < 0;
+    }
+
+    recycleCloud() {
+        this.x = Cloud.lastX;
+        Cloud.lastX += this.width;
+        this.setInitialImage();
     }
 }

@@ -1,5 +1,5 @@
 class Chicken extends MovableObject {
-    dead = false; // NEU
+    dead = false;
     y = 350;
     height = 80;
     width = 110;
@@ -17,22 +17,32 @@ class Chicken extends MovableObject {
     constructor() {
         super().loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
-        this.x = 300 + Math.random() * 2000;
-        this.speed = 0.15 + Math.random() * 0.5;
+        this.setRandomPositionAndSpeed();
         this.animate();
     }
 
-    animate() {
-        setInterval(() => {
-            if (!this.dead) {
-                this.moveLeft();
-            }
-        }, 1000 / 60);
+    setRandomPositionAndSpeed() {
+        this.x = 300 + Math.random() * 2000;
+        this.speed = 0.15 + Math.random() * 0.5;
+    }
 
+    animate() {
+        this.startMovement();
+        this.startAnimation();
+    }
+
+    startMovement() {
         setInterval(() => {
-            if (!this.dead) {
-                this.playAnimation(this.IMAGES_WALKING);
-            }
+            if (this.canMove()) this.moveLeft();
+        }, 1000 / 60);
+    }
+
+    startAnimation() {
+        setInterval(() => {
+            if (this.canAnimate()) this.playAnimation(this.IMAGES_WALKING);
         }, 200);
     }
+
+    canMove() { return !this.dead; }
+    canAnimate() { return !this.dead; }
 }

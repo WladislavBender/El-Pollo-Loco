@@ -9,7 +9,7 @@ class CollectableObject extends MovableObject {
         'img/8_coin/coin_2.png'
     ];
 
-    type; // 'bottle' oder 'coin'
+    type;
 
     constructor(type, x, y) {
         super();
@@ -17,20 +17,33 @@ class CollectableObject extends MovableObject {
         this.x = x;
         this.y = y;
 
-        if (type === 'bottle') {
-            this.height = 110; // Größe für Bottles
-            this.width = 110;
-            let randomImg = this.IMAGES_COLLECTABLE_BOTTLES[
-                Math.floor(Math.random() * this.IMAGES_COLLECTABLE_BOTTLES.length)
-            ];
-            this.loadImage(randomImg);
-        } else if (type === 'coin') {
-            this.height = 180; // Größe für Coins
-            this.width = 180;
-            this.loadImage(this.IMAGES_COLLECTABLE_COINS[0]);
-            this.loadImages(this.IMAGES_COLLECTABLE_COINS);
-            this.animateCoins();
-        }
+        if (this.isBottle()) this.setupBottle();
+        if (this.isCoin()) this.setupCoin();
+    }
+
+    isBottle() {
+        return this.type === 'bottle';
+    }
+
+    isCoin() {
+        return this.type === 'coin';
+    }
+
+    setupBottle() {
+        this.height = 110;
+        this.width = 110;
+        let randomImg = this.IMAGES_COLLECTABLE_BOTTLES[
+            Math.floor(Math.random() * this.IMAGES_COLLECTABLE_BOTTLES.length)
+        ];
+        this.loadImage(randomImg);
+    }
+
+    setupCoin() {
+        this.height = 180;
+        this.width = 180;
+        this.loadImage(this.IMAGES_COLLECTABLE_COINS[0]);
+        this.loadImages(this.IMAGES_COLLECTABLE_COINS);
+        this.animateCoins();
     }
 
     animateCoins() {

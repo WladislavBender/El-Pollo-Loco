@@ -1,5 +1,4 @@
 class MovableObject extends DrawableObject {
-
     speed = 0.15;
     otherDirection = false;
     speedY = 0;
@@ -8,100 +7,72 @@ class MovableObject extends DrawableObject {
     lastHit = 0;
 
     isAboveGround() {
-        if (this instanceof ThrowableObject) {
-            return true;
-        } else {
-            return this.y < 135;
-        }
+        return this instanceof ThrowableObject || this.y < 135;
     }
-
 
     getCollisionBox() {
-        let x = this.x;
-        let y = this.y;
-        let w = this.width;
-        let h = this.height;
-
-        if (this instanceof Character) {
-            let offsetX = 20;
-            let offsetYTop = 120;
-            let offsetYBottom = 20;
-
-            x = this.x + offsetX;
-            y = this.y + offsetYTop;
-            w = this.width - offsetX * 2;
-            h = this.height - offsetYTop - offsetYBottom;
-        }
-
-        return { x, y, w, h };
+        if (this instanceof Character) return this.getCharacterCollisionBox();
+        return { x: this.x, y: this.y, w: this.width, h: this.height };
     }
 
-    /**
-     * Kollisionsabfrage mit Gegnern
-     * - Character → roter Rahmen
-     * - Gegner → voller Rahmen
-     */
+    getCharacterCollisionBox() {
+        const offsetX = 20;
+        const offsetYTop = 120;
+        const offsetYBottom = 20;
+        return {
+            x: this.x + offsetX,
+            y: this.y + offsetYTop,
+            w: this.width - offsetX * 2,
+            h: this.height - offsetYTop - offsetYBottom
+        };
+    }
+
     isColliding(mo) {
         const a = this.getCollisionBox();
         const b = mo.getCollisionBox ? mo.getCollisionBox() : { x: mo.x, y: mo.y, w: mo.width, h: mo.height };
-
-        return (
-            a.x + a.w > b.x &&
-            a.x < b.x + b.w &&
-            a.y + a.h > b.y &&
-            a.y < b.y + b.h
-        );
+        return this.boxesOverlap(a, b);
     }
 
-    /**
-     * Kollisionsabfrage mit Collectables (Coins, Bottles)
-     * - Character → roter Rahmen
-     * - Collectable → voller Rahmen
-     */
     isCollidingCollectable(mo) {
-        const a = this.getCollisionBox(); // Character (roter Rahmen)
-        const b = { x: mo.x, y: mo.y, w: mo.width, h: mo.height }; // Collectable (voller Rahmen)
+        const a = this.getCollisionBox();
+        const b = { x: mo.x, y: mo.y, w: mo.width, h: mo.height };
+        return this.boxesOverlap(a, b);
+    }
 
-        return (
-            a.x + a.w > b.x &&
-            a.x < b.x + b.w &&
-            a.y + a.h > b.y &&
-            a.y < b.y + b.h
-        );
+    boxesOverlap(a, b) {
+        return a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h;
     }
 
     applyGravity() {
         setInterval(() => {
-            if (this.isAboveGround() || this.speedY > 0) {
-                this.y -= this.speedY;
-                this.speedY -= this.acceleration;
-            }
+            if (this.shouldApplyGravity()) this.applyVerticalMovement();
         }, 100 / 25);
     }
 
+    shouldApplyGravity() {
+        return this.isAboveGround() || this.speedY > 0;
+    }
+
+    applyVerticalMovement() {
+        this.y -= this.speedY;
+        this.speedY -= this.acceleration;
+    }
+
     hit() {
-        this.energy -= 5;
-        if (this.energy < 0) {
-            this.energy = 0;
-        } else {
-            this.lastHit = new Date().getTime();
-        }
+        this.energy = Math.max(0, this.energy - 5);
+        if (!this.isDead()) this.lastHit = new Date().getTime();
     }
 
     isHurt() {
-        let timepassed = new Date().getTime() - this.lastHit;
-        timepassed = timepassed / 1000;
-        return timepassed < 1.5;
+        return (new Date().getTime() - this.lastHit) / 1000 < 1.5;
     }
 
     isDead() {
-        return this.energy == 0;
+        return this.energy === 0;
     }
 
     playAnimation(images) {
-        let i = this.currentImage % images.length;
-        let path = images[i];
-        this.img = this.imageCache[path];
+        this.img = this.imageCache[images[this.currentImage % images.length]];
         this.currentImage++;
     }
 
