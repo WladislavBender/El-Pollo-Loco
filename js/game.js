@@ -1,6 +1,12 @@
 let canvas;
 let world;
 let keyboard = new Keyboard();
+let backgroundMusic = new Audio("audio/background_music.mp3");
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.3;
+
+let soundEnabled = true;
+let gameStarted = false; // NEU: Spielstatus merken
 
 function init() {
     canvas = document.getElementById('canvas');
@@ -12,6 +18,11 @@ function restartGame() {
     initLevel();
     world = new World(canvas, keyboard);
     hideEndScreen();
+
+    if (soundEnabled) {
+        backgroundMusic.currentTime = 0;
+        backgroundMusic.play().catch(err => console.log("Autoplay blockiert:", err));
+    }
 }
 
 function clearCanvas() {
@@ -23,6 +34,14 @@ function hideEndScreen() {
     const endScreen = document.getElementById("end-screen");
     endScreen.classList.remove("show");
     endScreen.classList.add("hidden");
+}
+
+function showEndScreen() {
+    const endScreen = document.getElementById("end-screen");
+    endScreen.classList.remove("hidden");
+    endScreen.classList.add("show");
+
+    stopMusic();
 }
 
 function toggleFullscreen() {
@@ -58,6 +77,13 @@ function startGame() {
     initLevel();
     init();
     fadeOutStartScreen(startScreen);
+
+    gameStarted = true; // ab jetzt darf Musik laufen
+
+    if (soundEnabled) {
+        backgroundMusic.currentTime = 0;
+        backgroundMusic.play().catch(err => console.log("Autoplay blockiert:", err));
+    }
 }
 
 function fadeOutStartScreen(startScreen) {
@@ -65,8 +91,48 @@ function fadeOutStartScreen(startScreen) {
     setTimeout(() => startScreen.remove(), 1000);
 }
 
+// ----------------- Musik-Steuerung -----------------
+function stopMusic() {
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
+}
+
+function pauseMusic() {
+    backgroundMusic.pause();
+}
+
+function resumeMusic() {
+    if (soundEnabled && gameStarted && backgroundMusic.paused) {
+        backgroundMusic.play().catch(err => console.log("Autoplay blockiert:", err));
+    }
+}
+
+function toggleSound() {
+    const btn = document.getElementById("sound-btn");
+    soundEnabled = !soundEnabled;
+
+    if (soundEnabled) {
+        btn.textContent = "🔊";
+        if (gameStarted) resumeMusic(); // Nur wenn Spiel läuft
+    } else {
+        btn.textContent = "🔇";
+        pauseMusic();
+    }
+}
+
+// ----------------- Events -----------------
 window.addEventListener("keydown", (event) => handleKey(event, true));
 window.addEventListener("keyup", (event) => handleKey(event, false));
+
+window.addEventListener("beforeunload", () => stopMusic());
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        pauseMusic();
+    } else {
+        resumeMusic();
+    }
+});
 
 function handleKey(event, isPressed) {
     if (isRight(event)) keyboard.RIGHT = isPressed;

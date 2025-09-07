@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
 
+    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
     <title>El Pollo Loco</title>
 
     <script src="models/drawable-object.class.js"></script>
@@ -29,10 +30,17 @@
 
     <div id="content">
         <h1>El Pollo Loco</h1>
-        <canvas id="canvas" width="720" height="480"></canvas>
 
-        <!-- Fullscreen Button -->
-        <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+        <div id="canvas-container">
+            <canvas id="canvas" width="720" height="480"></canvas>
+
+            <!-- Sound Button -->
+            <button id="sound-btn" onclick="toggleSound()">🔊</button>
+
+            <!-- Fullscreen Button -->
+            <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+        </div>
+
 
         <!-- Startscreen -->
         <div id="start-screen">
@@ -49,14 +57,11 @@
         </div>
     </div>
 
-
-
     <div class="instructions">
         <p>Movement: LEFT & RIGHT Arrows</p>
         <p>Jump: SPACE</p>
         <p>Throw: D</p>
     </div>
-
 
 </body>
 
