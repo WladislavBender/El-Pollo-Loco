@@ -183,6 +183,7 @@ class World {
         this.level.enemies.forEach(enemy => {
             if (this.isEnemyCollision(enemy)) {
                 this.handleEnemyCollision(enemy);
+                playHitSound(); // 🔊 HIT-SOUND bei Collision
             }
         });
         this.collectableObjects = this.collectableObjects.filter(obj => !this.collectItem(obj));

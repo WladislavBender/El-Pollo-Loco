@@ -5,6 +5,9 @@ let backgroundMusic = new Audio("audio/background_music.mp3");
 backgroundMusic.loop = true;
 backgroundMusic.volume = 0.3;
 
+let hitSound = new Audio("audio/hit_sound.m4a");
+hitSound.volume = 0.7;
+
 let soundEnabled = true;
 let gameStarted = false; // NEU: Spielstatus merken
 
@@ -117,6 +120,15 @@ function toggleSound() {
     } else {
         btn.textContent = "🔇";
         pauseMusic();
+    }
+}
+
+// ----------------- Hit-Sound Funktion -----------------
+function playHitSound() {
+    if (soundEnabled) {
+        let sfx = hitSound.cloneNode(); // verhindert Überschneidungsfehler
+        sfx.volume = hitSound.volume;
+        sfx.play().catch(err => console.log("Hit-Sound blockiert:", err));
     }
 }
 

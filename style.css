@@ -5,11 +5,19 @@
 
 body {
     align-items: center;
-    background-image: url('img/background_desert.jpg');
+    background-image: url('img/background_desert2.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    /* Bild immer über gesamten Bildschirm */
+    background-position: center;
+    /* zentrieren */
+    min-height: 100vh;
+    /* Höhe mindestens Viewport */
     display: flex;
     flex-direction: column;
     font-family: myFont, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
+
 
 #content {
     display: inline-block;
