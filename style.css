@@ -154,19 +154,19 @@ canvas:fullscreen {
 /* Sound-Button -> oben rechts */
 #sound-btn {
     top: 180px;
-    right: 20px;
+    left: 20px;
 }
 
 /* Fullscreen-Button -> unten rechts */
 #fullscreen-btn {
-    bottom: 20px;
+    top: 180px;
     right: 20px;
 }
 
 /* Nur der Fullscreen-Button soll im Fullscreen fixiert sein */
 #content:fullscreen #fullscreen-btn {
     position: fixed;
-    bottom: 20px;
+    top: 20px;
     right: 20px;
 }
 
@@ -174,7 +174,7 @@ canvas:fullscreen {
 #content:fullscreen #sound-btn {
     position: absolute;
     top: 20px;
-    right: 20px;
+    left: 20px;
 }
 
 
@@ -303,12 +303,57 @@ h1 {
         display: none;
     }
 
+    #fullscreen-btn{
+        display: none;
+    }
+
     canvas,
     #canvas-container,
     #start-screen,
     #end-screen {
-        width: 500px;
-        height: 100%;
-        top: 16px;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        border: none;
     }
+}
+
+@media screen and (max-height: 680px) and (orientation: landscape) {
+    h1 {
+        display: none;
+    }
+
+    #fullscreen-btn{
+        display: none;
+    }
+
+    canvas,
+    #canvas-container,
+    #start-screen,
+    #end-screen {
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        border: none;
+    }
+}
+
+#rotate-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    text-align: center;
+    font-size: 24px;
+}
+
+#rotate-overlay.hidden {
+    display: none;
 }

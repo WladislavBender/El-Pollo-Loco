@@ -236,3 +236,36 @@ function setKey(key, isPressed) {
     }
 }
 
+function handleOrientation() {
+    const isMobile = detectDevice();
+    const overlay = document.getElementById("rotate-overlay");
+
+    if (isMobile) {
+        if (window.matchMedia("(orientation: landscape)").matches) {
+            // ✅ Querformat → Overlay ausblenden
+            overlay.classList.add("hidden");
+
+            // ❌ KEIN automatisches requestFullscreen hier!
+            // Stattdessen: Nutzer soll den Fullscreen-Button nutzen
+        } else {
+            // 🚫 Hochformat → Overlay einblenden
+            overlay.classList.remove("hidden");
+
+            // Falls noch fullscreen → verlassen
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(err =>
+                    console.error("Fullscreen konnte nicht verlassen werden:", err)
+                );
+            }
+        }
+    } else {
+        // 💻 Desktop → Overlay sicher verstecken
+        overlay.classList.add("hidden");
+    }
+}
+
+
+// Auf Änderungen reagieren
+window.addEventListener("orientationchange", handleOrientation);
+window.addEventListener("resize", handleOrientation);
+window.addEventListener("load", handleOrientation);
