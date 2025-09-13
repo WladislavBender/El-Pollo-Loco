@@ -3,20 +3,34 @@
     src: url('fonts/Arbutus-Regular.ttf');
 }
 
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* 🚫 verhindert Scrollen */
+    height: 100%;
+    width: 100%;
+}
+
+
 body {
     align-items: center;
     background-image: url('img/background_desert2.jpg');
     background-repeat: no-repeat;
     background-size: cover;
-    /* Bild immer über gesamten Bildschirm */
+    /* Bild auf Viewport anpassen */
     background-position: center;
-    /* zentrieren */
     min-height: 100vh;
-    /* Höhe mindestens Viewport */
     display: flex;
     flex-direction: column;
     font-family: myFont, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* ✨ kein Scrollen mehr */
 }
+
 
 
 #content {
@@ -235,4 +249,54 @@ h1 {
 
 .overlay-content {
     padding: 16px;
+}
+
+#mobile-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    /* wichtig: nur Buttons klickbar */
+    z-index: 30;
+}
+
+#left-controls,
+#right-controls {
+    position: absolute;
+    bottom: 20px;
+    display: flex;
+    gap: 20px;
+    pointer-events: auto;
+}
+
+#left-controls {
+    left: 20px;
+}
+
+#right-controls {
+    right: 20px;
+    flex-direction: column;
+    /* übereinander */
+}
+
+#mobile-controls button {
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid white;
+    border-radius: 50%;
+    /* rund */
+    color: white;
+    font-size: 28px;
+    width: 64px;
+    height: 64px;
+    cursor: pointer;
+    user-select: none;
+}
+
+#mobile-controls button:active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#mobile-controls.hidden {
+    display: none;
 }

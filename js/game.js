@@ -152,6 +152,26 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
+function detectDevice() {
+    const isMobileUA = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    return (isMobileUA || isTouch);
+}
+
+window.addEventListener("load", () => {
+    const mobileControls = document.getElementById("mobile-controls");
+    if (detectDevice()) {
+        console.log("📱 Mobile erkannt");
+        mobileControls.classList.remove("hidden");
+        bindMobileControls();   // 🚀 Buttons aktivieren
+    } else {
+        console.log("💻 Desktop erkannt");
+        mobileControls.classList.add("hidden");
+    }
+});
+
+
+
 function handleKey(event, isPressed) {
     if (isRight(event)) keyboard.RIGHT = isPressed;
     if (isLeft(event)) keyboard.LEFT = isPressed;
@@ -167,3 +187,52 @@ function isUp(event) { return event.keyCode === 38; }
 function isDown(event) { return event.keyCode === 40; }
 function isSpace(event) { return event.keyCode === 32; }
 function isThrow(event) { return event.keyCode === 68; }
+
+
+function bindMobileControls() {
+    const controls = [
+        { id: "btn-left", key: "LEFT" },
+        { id: "btn-right", key: "RIGHT" },
+        { id: "btn-jump", key: "SPACE" },
+        { id: "btn-throw", key: "D" }
+    ];
+
+    controls.forEach(control => {
+        const btn = document.getElementById(control.id);
+
+        // Finger gedrückt → Flag true
+        btn.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            setKey(control.key, true);
+        });
+        btn.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            setKey(control.key, true);
+        });
+
+        // Finger losgelassen → Flag false
+        btn.addEventListener("touchend", (e) => {
+            e.preventDefault();
+            setKey(control.key, false);
+        });
+        btn.addEventListener("mouseup", (e) => {
+            e.preventDefault();
+            setKey(control.key, false);
+        });
+
+        // Falls Finger vom Button rutscht
+        btn.addEventListener("touchcancel", () => setKey(control.key, false));
+        btn.addEventListener("mouseleave", () => setKey(control.key, false));
+    });
+}
+
+// Hilfsfunktion → setzt Keyboard-Flags
+function setKey(key, isPressed) {
+    switch (key) {
+        case 'LEFT': keyboard.LEFT = isPressed; break;
+        case 'RIGHT': keyboard.RIGHT = isPressed; break;
+        case 'SPACE': keyboard.SPACE = isPressed; break;
+        case 'D': keyboard.D = isPressed; break;
+    }
+}
+
