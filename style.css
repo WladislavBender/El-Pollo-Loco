@@ -69,7 +69,6 @@ canvas:fullscreen {
 /* ------------------- Screens ------------------- */
 #start-screen,
 #end-screen {
-    align-items: center;
     background: rgba(0, 0, 0, 0.8);
     border: 6px solid white;
     display: flex;
@@ -86,6 +85,7 @@ canvas:fullscreen {
 
 /* Startscreen Bild */
 #start-screen {
+    align-items: center;
     background-image: url('./img/9_intro_outro_screens/start/startscreen_1.png');
     background-position: center;
     background-size: cover;
@@ -99,6 +99,7 @@ canvas:fullscreen {
 
 /* Endscreen */
 #end-screen {
+    align-items: end;
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -281,6 +282,26 @@ h1 {
     display: none;
 }
 
+#rotate-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    text-align: center;
+    font-size: 24px;
+}
+
+#rotate-overlay.hidden {
+    display: none;
+}
+
 /* ------------------- Media Queries ------------------- */
 @media (max-width: 1366px) {
     .instructions {
@@ -303,7 +324,7 @@ h1 {
         display: none;
     }
 
-    #fullscreen-btn{
+    #fullscreen-btn {
         display: none;
     }
 
@@ -323,7 +344,7 @@ h1 {
         display: none;
     }
 
-    #fullscreen-btn{
+    #fullscreen-btn {
         display: none;
     }
 
@@ -336,24 +357,4 @@ h1 {
         top: 0;
         border: none;
     }
-}
-
-#rotate-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    text-align: center;
-    font-size: 24px;
-}
-
-#rotate-overlay.hidden {
-    display: none;
 }
