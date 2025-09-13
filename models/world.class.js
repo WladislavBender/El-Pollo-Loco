@@ -270,7 +270,19 @@ class World {
         endScreen.classList.remove("hidden");
         endScreen.classList.add("show");
         document.getElementById("restart-btn").onclick = () => restartGame();
+
+        // 🔊 Endscreen-Sound (nur einmal abspielen)
+        if (soundEnabled) {
+            if (this.gameWon) {
+                winSound.currentTime = 0;
+                winSound.play().catch(err => console.log("Win-Sound blockiert:", err));
+            } else {
+                failSound.currentTime = 0;
+                failSound.play().catch(err => console.log("Fail-Sound blockiert:", err));
+            }
+        }
     }
+
 
     getEndscreenImage() {
         return this.gameWon

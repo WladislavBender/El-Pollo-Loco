@@ -8,6 +8,12 @@ backgroundMusic.volume = 0.3;
 let hitSound = new Audio("audio/hit_sound.m4a");
 hitSound.volume = 0.7;
 
+let winSound = new Audio("audio/win_sound.mp3");
+winSound.volume = 0.3;   // etwas leiser als Standard
+
+let failSound = new Audio("audio/fail_sound.mp3");
+failSound.volume = 0.4;  // etwas leiser als Standard
+
 let soundEnabled = true;
 let gameStarted = false; // NEU: Spielstatus merken
 
