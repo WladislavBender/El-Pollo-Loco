@@ -183,7 +183,7 @@ class World {
         this.level.enemies.forEach(enemy => {
             if (this.isEnemyCollision(enemy)) {
                 this.handleEnemyCollision(enemy);
-                playHitSound(); // 🔊 HIT-SOUND bei Collision
+                playHitSound();
             }
         });
         this.collectableObjects = this.collectableObjects.filter(obj => !this.collectItem(obj));
@@ -271,7 +271,6 @@ class World {
         endScreen.classList.add("show");
         document.getElementById("restart-btn").onclick = () => restartGame();
 
-        // 🔊 Endscreen-Sound (nur einmal abspielen)
         if (soundEnabled) {
             if (this.gameWon) {
                 winSound.currentTime = 0;
@@ -283,35 +282,41 @@ class World {
         }
     }
 
-
     getEndscreenImage() {
         return this.gameWon
             ? "url('img/You won, you lost/You won A.png')"
             : "url('img/You won, you lost/You lost.png')";
     }
 
-    handleRestartClick = (event) => {
-        const { x, y } = this.getClickCoordinates(event);
-        if (this.isInsideRestartButton(x, y)) {
-            this.canvas.removeEventListener("click", this.handleRestartClick);
-            restartGame();
+    // --- NEU: Pause / Resume ---
+    pause() {
+        if (this.gameInterval) {
+            clearInterval(this.gameInterval);
+            this.gameInterval = null;
         }
-    };
-
-    getClickCoordinates(event) {
-        const rect = this.canvas.getBoundingClientRect();
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
-        return {
-            x: (event.clientX - rect.left) * scaleX,
-            y: (event.clientY - rect.top) * scaleY
-        };
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
+        }
     }
 
-    isInsideRestartButton(x, y) {
-        const btnW = 160, btnH = 56;
-        const btnX = this.canvas.width / 2 - btnW / 2;
-        const btnY = this.canvas.height - 100;
-        return x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH;
+    resume() {
+        if (!this.gameInterval) {
+            this.run();
+        }
+        if (!this.animationFrame) {
+            this.draw();
+        }
     }
 }
+
+function togglePause() {
+    if (gamePaused) {
+        resumeGame();
+        document.getElementById("pause-btn").innerText = "⏸"; // Button zeigt Pause-Symbol
+    } else {
+        pauseGame();
+        document.getElementById("pause-btn").innerText = "▶️"; // Button zeigt Play-Symbol
+    }
+}
+

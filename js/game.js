@@ -9,29 +9,26 @@ let hitSound = new Audio("audio/hit_sound.m4a");
 hitSound.volume = 0.7;
 
 let winSound = new Audio("audio/win_sound.mp3");
-winSound.volume = 0.3;   // etwas leiser als Standard
+winSound.volume = 0.3;
 
 let failSound = new Audio("audio/fail_sound.mp3");
-failSound.volume = 0.4;  // etwas leiser als Standard
+failSound.volume = 0.4;
 
 let soundEnabled = true;
-let gameStarted = false; // NEU: Spielstatus merken
+let gameStarted = false;
+let gamePaused = false; // Status für Pause
 
 function init() {
     canvas = document.getElementById('canvas');
     world = new World(canvas, keyboard);
 }
 
+/**
+ * 🔄 Restart-Funktion
+ * Lädt die Seite komplett neu -> zurück zum Startbildschirm
+ */
 function restartGame() {
-    clearCanvas();
-    initLevel();
-    world = new World(canvas, keyboard);
-    hideEndScreen();
-
-    if (soundEnabled) {
-        backgroundMusic.currentTime = 0;
-        backgroundMusic.play().catch(err => console.log("Autoplay blockiert:", err));
-    }
+    location.reload();
 }
 
 function clearCanvas() {
@@ -49,7 +46,6 @@ function showEndScreen() {
     const endScreen = document.getElementById("end-screen");
     endScreen.classList.remove("hidden");
     endScreen.classList.add("show");
-
     stopMusic();
 }
 
@@ -86,8 +82,7 @@ function startGame() {
     initLevel();
     init();
     fadeOutStartScreen(startScreen);
-
-    gameStarted = true; // ab jetzt darf Musik laufen
+    gameStarted = true;
 
     if (soundEnabled) {
         backgroundMusic.currentTime = 0;
@@ -100,7 +95,7 @@ function fadeOutStartScreen(startScreen) {
     setTimeout(() => startScreen.remove(), 1000);
 }
 
-// ----------------- Musik-Steuerung -----------------
+// --- Musiksteuerung ---
 function stopMusic() {
     backgroundMusic.pause();
     backgroundMusic.currentTime = 0;
@@ -122,28 +117,67 @@ function toggleSound() {
 
     if (soundEnabled) {
         btn.textContent = "🔊";
-        if (gameStarted) resumeMusic(); // Nur wenn Spiel läuft
+        if (gameStarted) resumeMusic();
     } else {
         btn.textContent = "🔇";
         pauseMusic();
     }
 }
 
-// ----------------- Hit-Sound Funktion -----------------
+// --- Hit-Sound ---
 function playHitSound() {
     if (soundEnabled) {
-        let sfx = hitSound.cloneNode(); // verhindert Überschneidungsfehler
+        let sfx = hitSound.cloneNode();
         sfx.volume = hitSound.volume;
         sfx.play().catch(err => console.log("Hit-Sound blockiert:", err));
     }
 }
 
-// ----------------- Events -----------------
+// --- Pause / Resume ---
+function updatePauseButton() {
+    const btn = document.getElementById("pause-btn");
+    btn.innerText = gamePaused ? "▶️" : "⏸";
+}
+
+function pauseGame() {
+    if (world && !gamePaused) {
+        gamePaused = true;
+        world.pause();
+        pauseMusic();
+        document.getElementById("pause-overlay").classList.remove("hidden");
+        updatePauseButton();
+    }
+}
+
+function resumeGame() {
+    if (world && gamePaused) {
+        gamePaused = false;
+        world.resume();
+        resumeMusic();
+        document.getElementById("pause-overlay").classList.add("hidden");
+        updatePauseButton();
+    }
+}
+
+function togglePause() {
+    if (gamePaused) {
+        resumeGame();
+    } else {
+        pauseGame();
+    }
+}
+
+// ESC als Pause-Taste
+window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        togglePause();
+    }
+});
+
+// --- Events ---
 window.addEventListener("keydown", (event) => handleKey(event, true));
 window.addEventListener("keyup", (event) => handleKey(event, false));
-
 window.addEventListener("beforeunload", () => stopMusic());
-
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
         pauseMusic();
@@ -163,14 +197,12 @@ window.addEventListener("load", () => {
     if (detectDevice()) {
         console.log("📱 Mobile erkannt");
         mobileControls.classList.remove("hidden");
-        bindMobileControls();   // 🚀 Buttons aktivieren
+        bindMobileControls();
     } else {
         console.log("💻 Desktop erkannt");
         mobileControls.classList.add("hidden");
     }
 });
-
-
 
 function handleKey(event, isPressed) {
     if (isRight(event)) keyboard.RIGHT = isPressed;
@@ -188,7 +220,6 @@ function isDown(event) { return event.keyCode === 40; }
 function isSpace(event) { return event.keyCode === 32; }
 function isThrow(event) { return event.keyCode === 68; }
 
-
 function bindMobileControls() {
     const controls = [
         { id: "btn-left", key: "LEFT" },
@@ -199,34 +230,15 @@ function bindMobileControls() {
 
     controls.forEach(control => {
         const btn = document.getElementById(control.id);
-
-        // Finger gedrückt → Flag true
-        btn.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            setKey(control.key, true);
-        });
-        btn.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            setKey(control.key, true);
-        });
-
-        // Finger losgelassen → Flag false
-        btn.addEventListener("touchend", (e) => {
-            e.preventDefault();
-            setKey(control.key, false);
-        });
-        btn.addEventListener("mouseup", (e) => {
-            e.preventDefault();
-            setKey(control.key, false);
-        });
-
-        // Falls Finger vom Button rutscht
+        btn.addEventListener("touchstart", (e) => { e.preventDefault(); setKey(control.key, true); });
+        btn.addEventListener("mousedown", (e) => { e.preventDefault(); setKey(control.key, true); });
+        btn.addEventListener("touchend", (e) => { e.preventDefault(); setKey(control.key, false); });
+        btn.addEventListener("mouseup", (e) => { e.preventDefault(); setKey(control.key, false); });
         btn.addEventListener("touchcancel", () => setKey(control.key, false));
         btn.addEventListener("mouseleave", () => setKey(control.key, false));
     });
 }
 
-// Hilfsfunktion → setzt Keyboard-Flags
 function setKey(key, isPressed) {
     switch (key) {
         case 'LEFT': keyboard.LEFT = isPressed; break;
@@ -242,16 +254,9 @@ function handleOrientation() {
 
     if (isMobile) {
         if (window.matchMedia("(orientation: landscape)").matches) {
-            // ✅ Querformat → Overlay ausblenden
             overlay.classList.add("hidden");
-
-            // ❌ KEIN automatisches requestFullscreen hier!
-            // Stattdessen: Nutzer soll den Fullscreen-Button nutzen
         } else {
-            // 🚫 Hochformat → Overlay einblenden
             overlay.classList.remove("hidden");
-
-            // Falls noch fullscreen → verlassen
             if (document.fullscreenElement) {
                 document.exitFullscreen().catch(err =>
                     console.error("Fullscreen konnte nicht verlassen werden:", err)
@@ -259,13 +264,10 @@ function handleOrientation() {
             }
         }
     } else {
-        // 💻 Desktop → Overlay sicher verstecken
         overlay.classList.add("hidden");
     }
 }
 
-
-// Auf Änderungen reagieren
 window.addEventListener("orientationchange", handleOrientation);
 window.addEventListener("resize", handleOrientation);
 window.addEventListener("load", handleOrientation);

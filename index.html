@@ -37,6 +37,18 @@
             <!-- Sound Button -->
             <button id="sound-btn" onclick="toggleSound()">🔊</button>
 
+            <!-- Pause Button -->
+            <button id="pause-btn" onclick="togglePause()">⏸</button>
+
+            <!-- Pause Overlay -->
+            <div id="pause-overlay" class="hidden">
+                <div class="overlay-content">
+                    <button onclick="resumeGame()">Fortsetzen</button>
+                    <button onclick="restartGame()">Restart</button>
+                </div>
+            </div>
+
+
             <!-- Fullscreen Button -->
             <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
 
