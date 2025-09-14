@@ -403,10 +403,19 @@ h1 {
         display: none;
     }
 
+    #sound-btn {
+        top: 20px;
+    }
+
+    #pause-btn {
+        top: 20px;
+    }
+
     canvas,
     #canvas-container,
     #start-screen,
-    #end-screen {
+    #end-screen,
+    #pause-overlay {
         width: 100vw;
         height: 100vh;
         top: 0;
@@ -423,10 +432,19 @@ h1 {
         display: none;
     }
 
+    #sound-btn {
+        top: 20px;
+    }
+
+    #pause-btn {
+        top: 20px;
+    }
+
     canvas,
     #canvas-container,
     #start-screen,
-    #end-screen {
+    #end-screen,
+    #pause-overlay {
         width: 100vw;
         height: 100vh;
         top: 0;
