@@ -7,7 +7,7 @@ class Endboss extends MovableObject {
     x = 2500;
     energy = 100;
     direction = -100;
-    speed = 0;
+    speed = 0.15;
 
     dead = false;
     inAlert = false;
