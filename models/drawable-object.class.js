@@ -8,6 +8,8 @@ class DrawableObject {
     height = 150;
     width = 100;
 
+    debugFrames = false; // ⬅️ Debug mode: false = invisible, true = frames visible
+
     /* =================== Image Loading =================== */
 
     /**
@@ -42,22 +44,14 @@ class DrawableObject {
     }
 
     /**
-     * Draws frames (blue and red) for debugging collisions or boundaries.
+     * Optionally draws debug frames (blue + red) if debugFrames = true.
      * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on.
      */
     drawFrame(ctx) {
-        if (this.shouldDrawFrame()) {
+        if (this.debugFrames && (this.isCharacter() || this.isChicken())) {
             this.drawBlueFrame(ctx);
             this.drawRedFrame(ctx);
         }
-    }
-
-    /**
-     * Checks if frames should be drawn for this object.
-     * @returns {boolean} True if object is a Character or Chicken.
-     */
-    shouldDrawFrame() {
-        return this.isCharacter() || this.isChicken();
     }
 
     /* =================== Type Checks =================== */
@@ -98,7 +92,6 @@ class DrawableObject {
      */
     drawRedFrame(ctx) {
         const { newX, newY, newW, newH } = this.getCollisionBox();
-
         ctx.beginPath();
         ctx.lineWidth = 2;
         ctx.strokeStyle = 'red';

@@ -329,11 +329,9 @@ function setKey(key, isPressed) {
 window.addEventListener("load", () => {
     const mobileControls = document.getElementById("mobile-controls");
     if (detectDevice()) {
-        console.log("📱 Mobile detected");
         mobileControls.classList.remove("hidden");
         bindMobileControls();
     } else {
-        console.log("💻 Desktop detected");
         mobileControls.classList.add("hidden");
     }
 });
