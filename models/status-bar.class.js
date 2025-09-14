@@ -1,4 +1,6 @@
+/* =================== StatusBar Class =================== */
 class StatusBar extends DrawableObject {
+    /* =================== Properties =================== */
     IMAGES_HEALTH = [
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png',
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/20.png',
@@ -39,8 +41,11 @@ class StatusBar extends DrawableObject {
     percentageCoins = 0;
     percentageBottles = 0;
     percentageEndboss = 100;
-    endbossVisible = false;     // ⬅️ Standardmäßig unsichtbar
-    endbossAlpha = 0;           // ⬅️ Start-Transparenz
+
+    endbossVisible = false; // ⬅️ Standardmäßig unsichtbar
+    endbossAlpha = 0;       // ⬅️ Start-Transparenz
+
+    /* =================== Initialization =================== */
 
     constructor() {
         super();
@@ -48,6 +53,9 @@ class StatusBar extends DrawableObject {
         this.setDimensions();
     }
 
+    /**
+     * Loads all status bar images into cache.
+     */
     loadAllImages() {
         this.loadImages(this.IMAGES_HEALTH);
         this.loadImages(this.IMAGES_COINS);
@@ -55,6 +63,9 @@ class StatusBar extends DrawableObject {
         this.loadImages(this.IMAGES_ENDBOSS);
     }
 
+    /**
+     * Sets the dimensions and base position of the status bars.
+     */
     setDimensions() {
         this.x = 20;
         this.y = 0;
@@ -62,6 +73,13 @@ class StatusBar extends DrawableObject {
         this.height = 60;
     }
 
+    /* =================== Logic =================== */
+
+    /**
+     * Updates the percentage value for a given bar type.
+     * @param {'health' | 'coins' | 'bottles' | 'endboss'} type - Type of status bar.
+     * @param {number} percentage - Value between 0 and 100.
+     */
     setPercentage(type, percentage) {
         const mapping = {
             health: 'percentageHealth',
@@ -72,6 +90,11 @@ class StatusBar extends DrawableObject {
         if (mapping[type]) this[mapping[type]] = percentage;
     }
 
+    /**
+     * Resolves the correct image index based on percentage.
+     * @param {number} percentage - Value between 0 and 100.
+     * @returns {number} Index for image array.
+     */
     resolveImageIndex(percentage) {
         if (percentage >= 100) return 5;
         if (percentage > 80) return 4;
@@ -81,41 +104,60 @@ class StatusBar extends DrawableObject {
         return 0;
     }
 
+    /* =================== Rendering =================== */
+
+    /**
+     * Draws all status bars onto the canvas.
+     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context.
+     */
     draw(ctx) {
         this.drawBar(ctx, this.IMAGES_HEALTH, this.percentageHealth, this.x, this.y);
         this.drawBar(ctx, this.IMAGES_COINS, this.percentageCoins, this.x, this.y + this.height - 10);
         this.drawBar(ctx, this.IMAGES_BOTTLES, this.percentageBottles, this.x, this.y + (this.height - 10) * 2);
 
-        // Endboss-Bar nur, wenn sichtbar
+        // Endboss-Bar nur, wenn sichtbar oder im Fade-In
         if (this.endbossVisible || this.endbossAlpha > 0) {
             ctx.save();
-            ctx.globalAlpha = this.endbossAlpha; // Transparenz anwenden
+            ctx.globalAlpha = this.endbossAlpha;
             this.drawBar(ctx, this.IMAGES_ENDBOSS, this.percentageEndboss, 500, 0);
             ctx.restore();
         }
     }
 
-
-    showEndbossBar() {
-        this.endbossVisible = true;
-        this.animateEndbossFadeIn();
-    }
-
-    animateEndbossFadeIn() {
-        let fadeInterval = setInterval(() => {
-            this.endbossAlpha += 0.05; // Fade-In Geschwindigkeit
-            if (this.endbossAlpha >= 1) {
-                this.endbossAlpha = 1;
-                clearInterval(fadeInterval);
-            }
-        }, 50); // alle 50ms transparenter machen
-    }
-
+    /**
+     * Draws a single status bar at given coordinates.
+     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context.
+     * @param {string[]} images - Array of image paths.
+     * @param {number} percentage - Percentage value (0–100).
+     * @param {number} x - X position.
+     * @param {number} y - Y position.
+     */
     drawBar(ctx, images, percentage, x, y) {
         const index = this.resolveImageIndex(percentage);
         const path = images[index];
         ctx.drawImage(this.imageCache[path], x, y, this.width, this.height);
     }
+
+    /* =================== Endboss Bar Handling =================== */
+
+    /**
+     * Makes the Endboss bar visible and starts fade-in animation.
+     */
+    showEndbossBar() {
+        this.endbossVisible = true;
+        this.animateEndbossFadeIn();
+    }
+
+    /**
+     * Fades in the Endboss bar smoothly.
+     */
+    animateEndbossFadeIn() {
+        let fadeInterval = setInterval(() => {
+            this.endbossAlpha += 0.05;
+            if (this.endbossAlpha >= 1) {
+                this.endbossAlpha = 1;
+                clearInterval(fadeInterval);
+            }
+        }, 50);
+    }
 }
-
-

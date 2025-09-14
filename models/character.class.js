@@ -1,8 +1,11 @@
+/* =================== Character Class =================== */
 class Character extends MovableObject {
     height = 300;
     width = 150;
     y = 35;
     speed = 10;
+    world;
+    lastMoveTime;
 
     IMAGES_IDLE = [
         'img/2_character_pepe/1_idle/idle/I-1.png',
@@ -67,8 +70,11 @@ class Character extends MovableObject {
         'img/2_character_pepe/4_hurt/H-43.png'
     ];
 
-    world;
+    /* =================== Initialization =================== */
 
+    /**
+     * Creates a new character and initializes images, gravity, and animations.
+     */
     constructor() {
         super().loadImage('img/2_character_pepe/2_walk/W-21.png');
         this.loadAllImages();
@@ -77,6 +83,9 @@ class Character extends MovableObject {
         this.animate();
     }
 
+    /**
+     * Loads all character image sets into the cache.
+     */
     loadAllImages() {
         this.loadImages(this.IMAGES_IDLE);
         this.loadImages(this.IMAGES_LONG_IDLE);
@@ -86,42 +95,118 @@ class Character extends MovableObject {
         this.loadImages(this.IMAGES_HURT);
     }
 
+    /* =================== Animation Loop =================== */
+
+    /**
+     * Starts the animation loop for movement and image changes.
+     */
     animate() {
         setInterval(() => this.handleMovement(), 1000 / 60);
         setInterval(() => this.handleAnimations(), 50);
     }
 
+    /* =================== Movement =================== */
+
+    /**
+     * Handles movement input and updates character position.
+     */
     handleMovement() {
         if (!this.world?.keyboard) return;
         const kb = this.world.keyboard;
         let moved = false;
 
-        if (kb.RIGHT && this.canMoveRight()) { this.moveRight(); this.otherDirection = false; moved = true; }
-        if (kb.LEFT && this.canMoveLeft()) { this.moveLeft(); this.otherDirection = true; moved = true; }
-        if (kb.SPACE && this.canJump()) { this.jump(); moved = true; }
+        if (kb.RIGHT && this.canMoveRight()) {
+            this.moveRight();
+            this.otherDirection = false;
+            moved = true;
+        }
 
-        this.world.camera_x = -this.x + 100;
-        if (moved || kb.D) this.lastMoveTime = new Date().getTime();
+        if (kb.LEFT && this.canMoveLeft()) {
+            this.moveLeft();
+            this.otherDirection = true;
+            moved = true;
+        }
+
+        if (kb.SPACE && this.canJump()) {
+            this.jump();
+            moved = true;
+        }
+
+        this.updateCamera();
+        if (moved || kb.D) this.updateLastMoveTime();
     }
 
-    canMoveRight() { return this.x < this.world.level.level_end_x; }
-    canMoveLeft() { return this.x > 0; }
-    canJump() { return !this.isAboveGround(); }
+    /**
+     * Updates camera position relative to character.
+     */
+    updateCamera() {
+        this.world.camera_x = -this.x + 100;
+    }
 
+    /**
+     * Updates the last movement time to the current time.
+     */
+    updateLastMoveTime() {
+        this.lastMoveTime = new Date().getTime();
+    }
+
+    /**
+     * Checks if the character can move to the right.
+     * @returns {boolean} True if character is within world bounds.
+     */
+    canMoveRight() {
+        return this.x < this.world.level.level_end_x;
+    }
+
+    /**
+     * Checks if the character can move to the left.
+     * @returns {boolean} True if x > 0.
+     */
+    canMoveLeft() {
+        return this.x > 0;
+    }
+
+    /**
+     * Checks if the character can perform a jump.
+     * @returns {boolean} True if character is on the ground.
+     */
+    canJump() {
+        return !this.isAboveGround();
+    }
+
+    /* =================== Animation States =================== */
+
+    /**
+     * Handles character animations depending on state (idle, walking, jumping, etc.).
+     */
     handleAnimations() {
         if (!this.world?.keyboard) return;
         const kb = this.world.keyboard;
 
-        if (this.isDead()) { this.playAnimation(this.IMAGES_DEAD); return; }
-        if (this.isHurt()) { this.playAnimation(this.IMAGES_HURT); return; }
-        if (this.isAboveGround()) { this.playAnimation(this.IMAGES_JUMPING); return; }
+        if (this.isDead()) return this.playAnimation(this.IMAGES_DEAD);
+        if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT);
+        if (this.isAboveGround()) return this.playAnimation(this.IMAGES_JUMPING);
 
+        this.handleGroundAnimations(kb);
+    }
+
+    /**
+     * Handles animations when character is on the ground.
+     * @param {object} kb - Keyboard input object.
+     */
+    handleGroundAnimations(kb) {
         const now = new Date().getTime();
         const timeSinceMove = now - (this.lastMoveTime || now);
 
-        if (kb.RIGHT || kb.LEFT) this.playAnimation(this.IMAGES_WALKING);
-        else if (kb.D) { this.lastMoveTime = now; this.playAnimation(this.IMAGES_IDLE); }
-        else if (timeSinceMove > 3000) this.playAnimation(this.IMAGES_LONG_IDLE);
-        else this.playAnimation(this.IMAGES_IDLE);
+        if (kb.RIGHT || kb.LEFT) {
+            this.playAnimation(this.IMAGES_WALKING);
+        } else if (kb.D) {
+            this.lastMoveTime = now;
+            this.playAnimation(this.IMAGES_IDLE);
+        } else if (timeSinceMove > 3000) {
+            this.playAnimation(this.IMAGES_LONG_IDLE);
+        } else {
+            this.playAnimation(this.IMAGES_IDLE);
+        }
     }
 }

@@ -1,0 +1,104 @@
+/* ------------------- Mobile Controls ------------------- */
+#mobile-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 30;
+}
+
+#left-controls,
+#right-controls {
+    position: absolute;
+    bottom: 20px;
+    display: flex;
+    gap: 20px;
+    pointer-events: auto;
+}
+
+#left-controls {
+    left: 20px;
+}
+
+#right-controls {
+    right: 20px;
+    flex-direction: column;
+}
+
+#mobile-controls button {
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid white;
+    border-radius: 50%;
+    color: white;
+    font-size: 28px;
+    width: 64px;
+    height: 64px;
+    cursor: pointer;
+    user-select: none;
+}
+
+#mobile-controls button:active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#mobile-controls.hidden {
+    display: none;
+}
+
+#rotate-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    text-align: center;
+    font-size: 24px;
+}
+
+#rotate-overlay.hidden {
+    display: none;
+}
+
+/* ------------------- Overlay ------------------- */
+.overlay-content {
+    padding: 16px;
+    text-align: center;
+}
+
+/* ------------------- Start / Restart Btn ------------------- */
+#restart-btn,
+#start-btn {
+    background: #ff9800;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+#restart-btn {
+    font-size: 20px;
+    padding: 12px 24px;
+}
+
+#restart-btn:hover {
+    background: #e68900;
+    transform: scale(1.05);
+}
+
+#start-btn {
+    font-size: 36px;
+    padding: 12px 24px;
+}
+
+#start-btn:hover {
+    background: green;
+    transform: scale(1.05);
+}

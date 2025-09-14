@@ -1,48 +1,44 @@
+/* ------------------- Fonts ------------------- */
 @font-face {
     font-family: myFont;
     src: url('fonts/Arbutus-Regular.ttf');
 }
 
+/* ------------------- Base Layout ------------------- */
 html,
 body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    /* 🚫 verhindert Scrollen */
     height: 100%;
     width: 100%;
 }
 
 body {
+    display: flex;
+    flex-direction: column;
     align-items: center;
     background-image: url('img/background_desert2.jpg');
     background-repeat: no-repeat;
     background-size: cover;
-    /* Bild auf Viewport anpassen */
     background-position: center;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     font-family: myFont, 'Open Sans', 'Helvetica Neue', sans-serif;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
 }
 
 /* ------------------- Content ------------------- */
 #content {
     display: inline-block;
     position: relative;
-    /* wichtig, damit Buttons am Canvas ausgerichtet werden */
     text-align: center;
 }
 
 #content:fullscreen {
-    align-items: center;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    align-items: center;
     justify-content: center;
+    height: 100vh;
     width: 100vw;
 }
 
@@ -53,7 +49,6 @@ canvas {
     display: block;
 }
 
-/* Fullscreen → Canvas über den gesamten Bildschirm */
 #content:fullscreen canvas,
 canvas:fullscreen {
     position: absolute;
@@ -75,7 +70,6 @@ canvas:fullscreen {
     justify-content: center;
     position: absolute;
     top: 166px;
-    /* nur normaler Modus */
     left: 0;
     width: 720px;
     height: 480px;
@@ -83,7 +77,6 @@ canvas:fullscreen {
     transition: opacity 1s ease-in;
 }
 
-/* Startscreen Bild */
 #start-screen {
     align-items: center;
     background-image: url('./img/9_intro_outro_screens/start/startscreen_1.png');
@@ -97,7 +90,6 @@ canvas:fullscreen {
     pointer-events: none;
 }
 
-/* Endscreen */
 #end-screen {
     align-items: end;
     background-position: center;
@@ -119,7 +111,6 @@ canvas:fullscreen {
     visibility: hidden;
 }
 
-/* Fullscreen → Screens füllen gesamten Bildschirm */
 #content:fullscreen #start-screen,
 #content:fullscreen #end-screen,
 #content:fullscreen #pause-overlay {
@@ -141,38 +132,49 @@ canvas:fullscreen {
     font-size: 18px;
     padding: 12px 16px;
     position: absolute;
-    /* normaler Modus -> relativ zur Canvas */
     transition: transform 0.2s, background 0.2s;
     z-index: 20;
 }
 
-/* Hover-Effekt */
 #fullscreen-btn:hover,
-#sound-btn:hover {
+#sound-btn:hover,
+#pause-btn:hover {
     background: rgba(0, 0, 0, 0.35);
     transform: scale(1.1);
 }
 
-/* Sound-Button -> oben rechts */
 #sound-btn {
     top: 180px;
     left: 20px;
 }
 
-/* Fullscreen-Button -> unten rechts */
 #fullscreen-btn {
     top: 180px;
     right: 20px;
 }
 
-/* Nur der Fullscreen-Button soll im Fullscreen fixiert sein */
+#pause-btn {
+    background: rgba(0, 0, 0, 0.15);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 12px 16px;
+    position: absolute;
+    top: 240px;
+    right: 20px;
+    z-index: 20;
+    transition: transform 0.2s, background 0.2s;
+}
+
+/* Fullscreen Positionierung */
 #content:fullscreen #fullscreen-btn {
     position: fixed;
     top: 20px;
     right: 20px;
 }
 
-/* Sound-Button bleibt immer relativ zum Canvas */
 #content:fullscreen #sound-btn {
     position: absolute;
     top: 20px;
@@ -185,29 +187,7 @@ canvas:fullscreen {
     right: 20px;
 }
 
-/* Pause-Button */
-#pause-btn {
-    background: rgba(0, 0, 0, 0.15);
-    border: none;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    font-size: 18px;
-    padding: 12px 16px;
-    position: absolute;
-    top: 240px;
-    /* unter den anderen Buttons */
-    right: 20px;
-    z-index: 20;
-    transition: transform 0.2s, background 0.2s;
-}
-
-#pause-btn:hover {
-    background: rgba(0, 0, 0, 0.35);
-    transform: scale(1.1);
-}
-
-/* Pause Overlay */
+/* ------------------- Pause Overlay ------------------- */
 #pause-overlay {
     background: rgba(0, 0, 0, 0.6);
     border: 6px solid white;
@@ -243,7 +223,6 @@ canvas:fullscreen {
     transform: scale(1.05);
 }
 
-/* Fullscreen → Pause Overlay füllt den ganzen Screen */
 #content:fullscreen #pause-overlay {
     top: 0;
     left: 0;
@@ -252,129 +231,19 @@ canvas:fullscreen {
     border: none;
 }
 
-
-
-/* ------------------- Start / Restart Btn ------------------- */
-#restart-btn,
-#start-btn {
-    background: #ff9800;
-    border: none;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-}
-
-#restart-btn {
-    font-size: 20px;
-    padding: 12px 24px;
-}
-
-#restart-btn:hover {
-    background: #e68900;
-    transform: scale(1.05);
-}
-
-#start-btn {
-    font-size: 36px;
-    padding: 12px 24px;
-}
-
-#start-btn:hover {
-    background: green;
-    transform: scale(1.05);
-}
-
 /* ------------------- Titel & Infos ------------------- */
 h1 {
     font-size: 64px;
 }
 
 .instructions {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
     color: #ffffff;
-    display: flex;
     font-size: 18px;
-    justify-content: space-between;
-    padding: 0px 16px;
+    padding: 0 16px;
     width: 698px;
-}
-
-/* ------------------- Overlay ------------------- */
-.overlay-content {
-    padding: 16px;
-    text-align: center;
-}
-
-/* ------------------- Mobile Controls ------------------- */
-#mobile-controls {
-    position: fixed;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    pointer-events: none;
-    /* wichtig: nur Buttons klickbar */
-    z-index: 30;
-}
-
-#left-controls,
-#right-controls {
-    position: absolute;
-    bottom: 20px;
-    display: flex;
-    gap: 20px;
-    pointer-events: auto;
-}
-
-#left-controls {
-    left: 20px;
-}
-
-#right-controls {
-    right: 20px;
-    flex-direction: column;
-    /* übereinander */
-}
-
-#mobile-controls button {
-    background: rgba(0, 0, 0, 0.4);
-    border: 2px solid white;
-    border-radius: 50%;
-    /* rund */
-    color: white;
-    font-size: 28px;
-    width: 64px;
-    height: 64px;
-    cursor: pointer;
-    user-select: none;
-}
-
-#mobile-controls button:active {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-#mobile-controls.hidden {
-    display: none;
-}
-
-#rotate-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    text-align: center;
-    font-size: 24px;
-}
-
-#rotate-overlay.hidden {
-    display: none;
 }
 
 /* ------------------- Media Queries ------------------- */
@@ -394,48 +263,15 @@ h1 {
     }
 }
 
-@media screen and (max-width: 932px) and (orientation: landscape) {
-    h1 {
-        display: none;
-    }
+@media screen and (max-width: 932px) and (orientation: landscape),
+screen and (max-height: 680px) and (orientation: landscape) {
 
+    h1,
     #fullscreen-btn {
         display: none;
     }
 
-    #sound-btn {
-        top: 20px;
-    }
-
-    #pause-btn {
-        top: 20px;
-    }
-
-    canvas,
-    #canvas-container,
-    #start-screen,
-    #end-screen,
-    #pause-overlay {
-        width: 100vw;
-        height: 100vh;
-        top: 0;
-        border: none;
-    }
-}
-
-@media screen and (max-height: 680px) and (orientation: landscape) {
-    h1 {
-        display: none;
-    }
-
-    #fullscreen-btn {
-        display: none;
-    }
-
-    #sound-btn {
-        top: 20px;
-    }
-
+    #sound-btn,
     #pause-btn {
         top: 20px;
     }
