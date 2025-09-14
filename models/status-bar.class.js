@@ -39,6 +39,8 @@ class StatusBar extends DrawableObject {
     percentageCoins = 0;
     percentageBottles = 0;
     percentageEndboss = 100;
+    endbossVisible = false;     // ⬅️ Standardmäßig unsichtbar
+    endbossAlpha = 0;           // ⬅️ Start-Transparenz
 
     constructor() {
         super();
@@ -83,7 +85,30 @@ class StatusBar extends DrawableObject {
         this.drawBar(ctx, this.IMAGES_HEALTH, this.percentageHealth, this.x, this.y);
         this.drawBar(ctx, this.IMAGES_COINS, this.percentageCoins, this.x, this.y + this.height - 10);
         this.drawBar(ctx, this.IMAGES_BOTTLES, this.percentageBottles, this.x, this.y + (this.height - 10) * 2);
-        this.drawBar(ctx, this.IMAGES_ENDBOSS, this.percentageEndboss, 500, 0);
+
+        // Endboss-Bar nur, wenn sichtbar
+        if (this.endbossVisible || this.endbossAlpha > 0) {
+            ctx.save();
+            ctx.globalAlpha = this.endbossAlpha; // Transparenz anwenden
+            this.drawBar(ctx, this.IMAGES_ENDBOSS, this.percentageEndboss, 500, 0);
+            ctx.restore();
+        }
+    }
+
+
+    showEndbossBar() {
+        this.endbossVisible = true;
+        this.animateEndbossFadeIn();
+    }
+
+    animateEndbossFadeIn() {
+        let fadeInterval = setInterval(() => {
+            this.endbossAlpha += 0.05; // Fade-In Geschwindigkeit
+            if (this.endbossAlpha >= 1) {
+                this.endbossAlpha = 1;
+                clearInterval(fadeInterval);
+            }
+        }, 50); // alle 50ms transparenter machen
     }
 
     drawBar(ctx, images, percentage, x, y) {
@@ -92,3 +117,5 @@ class StatusBar extends DrawableObject {
         ctx.drawImage(this.imageCache[path], x, y, this.width, this.height);
     }
 }
+
+

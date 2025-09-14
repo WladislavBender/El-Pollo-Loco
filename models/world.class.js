@@ -58,9 +58,10 @@ class World {
     triggerEndboss() {
         let boss = this.level.enemies.find(e => e instanceof Endboss);
         if (boss && !boss.inAlert && !boss.moving && this.character.x >= 2000) {
-            boss.startAlert();
+            boss.startAlert(this.statusBar); // ⬅ StatusBar übergeben
         }
     }
+
 
     checkImmediateDefeat() {
         if (!this.gameOver && this.character.isDead()) {

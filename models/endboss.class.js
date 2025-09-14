@@ -70,13 +70,20 @@ class Endboss extends MovableObject {
         this.lastHit = new Date().getTime();
     }
 
-    startAlert() {
+    startAlert(statusBar) {
         this.inAlert = true;
+
+        // Endboss-Statusbar aktivieren
+        if (statusBar) {
+            statusBar.showEndbossBar();
+        }
+
         setTimeout(() => {
             this.inAlert = false;
             this.startMoving();
         }, 1500);
     }
+
 
     startMoving() {
         this.moving = true;
