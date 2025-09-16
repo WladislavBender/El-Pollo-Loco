@@ -43,6 +43,10 @@ a:hover {
     color: #e68900;
 }
 
+.hidden {
+    display: none !important;
+}
+
 /* ------------------- Impressum ------------------- */
 
 main {

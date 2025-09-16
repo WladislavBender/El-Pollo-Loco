@@ -82,9 +82,10 @@ class World {
         this.ctx.translate(this.camera_x, 0);
 
         this.addObjectsToMap(this.level.backgroundObjects);
+        this.addObjectsToMap(this.level.clouds);   // Clouds VOR die Statusbar
         this.ctx.translate(-this.camera_x, 0);
 
-        this.addToMap(this.statusBar);
+        this.addToMap(this.statusBar);   // Statusbar bleibt immer oben
         this.ctx.translate(this.camera_x, 0);
 
         this.checkBottleHits();
@@ -92,10 +93,10 @@ class World {
 
         this.addObjectsToMap([
             ...this.level.enemies,
-            ...this.level.clouds,
             ...this.collectableObjects,
             ...this.throwableObjects
         ]);
+
 
         this.ctx.translate(-this.camera_x, 0);
         this.animationFrame = requestAnimationFrame(() => this.draw());
