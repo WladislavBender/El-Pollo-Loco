@@ -7,6 +7,9 @@ class Character extends MovableObject {
     world;
     lastMoveTime;
 
+    deathSequenceStarted = false;
+    deathAnimationPlayed = false;
+
     IMAGES_IDLE = [
         'img/2_character_pepe/1_idle/idle/I-1.png',
         'img/2_character_pepe/1_idle/idle/I-2.png',
@@ -71,10 +74,6 @@ class Character extends MovableObject {
     ];
 
     /* =================== Initialization =================== */
-
-    /**
-     * Creates a new character and initializes images, gravity, and animations.
-     */
     constructor() {
         super().loadImage('img/2_character_pepe/2_walk/W-21.png');
         this.loadAllImages();
@@ -83,9 +82,6 @@ class Character extends MovableObject {
         this.animate();
     }
 
-    /**
-     * Loads all character image sets into the cache.
-     */
     loadAllImages() {
         this.loadImages(this.IMAGES_IDLE);
         this.loadImages(this.IMAGES_LONG_IDLE);
@@ -96,20 +92,12 @@ class Character extends MovableObject {
     }
 
     /* =================== Animation Loop =================== */
-
-    /**
-     * Starts the animation loop for movement and image changes.
-     */
     animate() {
         setInterval(() => this.handleMovement(), 1000 / 60);
         setInterval(() => this.handleAnimations(), 50);
     }
 
     /* =================== Movement =================== */
-
-    /**
-     * Handles movement input and updates character position.
-     */
     handleMovement() {
         if (!this.world?.keyboard) return;
         const kb = this.world.keyboard;
@@ -136,64 +124,38 @@ class Character extends MovableObject {
         if (moved || kb.D) this.updateLastMoveTime();
     }
 
-    /**
-     * Updates camera position relative to character.
-     */
     updateCamera() {
         this.world.camera_x = -this.x + 100;
     }
 
-    /**
-     * Updates the last movement time to the current time.
-     */
     updateLastMoveTime() {
         this.lastMoveTime = new Date().getTime();
     }
 
-    /**
-     * Checks if the character can move to the right.
-     * @returns {boolean} True if character is within world bounds.
-     */
     canMoveRight() {
         return this.x < this.world.level.level_end_x;
     }
 
-    /**
-     * Checks if the character can move to the left.
-     * @returns {boolean} True if x > 0.
-     */
     canMoveLeft() {
         return this.x > 0;
     }
 
-    /**
-     * Checks if the character can perform a jump.
-     * @returns {boolean} True if character is on the ground.
-     */
     canJump() {
         return !this.isAboveGround();
     }
 
     /* =================== Animation States =================== */
-
-    /**
-     * Handles character animations depending on state (idle, walking, jumping, etc.).
-     */
     handleAnimations() {
         if (!this.world?.keyboard) return;
         const kb = this.world.keyboard;
 
-        if (this.isDead()) return this.playAnimation(this.IMAGES_DEAD);
+        if (this.isDead()) return; // Death wird separat getriggert
         if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT);
         if (this.isAboveGround()) return this.playAnimation(this.IMAGES_JUMPING);
 
         this.handleGroundAnimations(kb);
     }
 
-    /**
-     * Handles animations when character is on the ground.
-     * @param {object} kb - Keyboard input object.
-     */
     handleGroundAnimations(kb) {
         const now = new Date().getTime();
         const timeSinceMove = now - (this.lastMoveTime || now);
@@ -208,5 +170,46 @@ class Character extends MovableObject {
         } else {
             this.playAnimation(this.IMAGES_IDLE);
         }
+    }
+
+    /* =================== Death Handling =================== */
+    isDead() {
+        return this.energy <= 0;
+    }
+
+    startDeath(onFinished) {
+        if (this.deathSequenceStarted) return;
+        this.deathSequenceStarted = true;
+
+        this.speed = 0; // Bewegung stoppen
+        this.playDeathAnimation(onFinished);
+    }
+
+    playDeathAnimation(onFinished) {
+        if (this.deathAnimationPlayed) {
+            if (onFinished) onFinished();
+            return;
+        }
+
+        this.deathAnimationPlayed = true;
+        let i = 0;
+        const frameTime = 200;
+
+        const interval = setInterval(() => {
+            const path = this.IMAGES_DEAD[i];
+            this.img = this.imageCache[path] || this.img;
+            i++;
+
+            if (i >= this.IMAGES_DEAD.length) {
+                clearInterval(interval);
+                this.setFinalDeathFrame(onFinished);
+            }
+        }, frameTime);
+    }
+
+    setFinalDeathFrame(onFinished) {
+        const lastPath = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
+        this.img = this.imageCache[lastPath] || this.img;
+        setTimeout(() => onFinished && onFinished(), 500);
     }
 }

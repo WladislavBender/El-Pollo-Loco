@@ -62,9 +62,15 @@ class World {
             this.checkThrowObjects();
             this.triggerEndboss();
 
-            if (this.character.isDead()) this.endGame(false);
+            // Character Death Handling
+            if (this.character.isDead() && !this.character.deathSequenceStarted) {
+                this.character.startDeath(() => {
+                    if (!this.gameOver) this.endGame(false);
+                });
+            }
         }, 200);
     }
+
 
     /* =================== Endboss Handling =================== */
     triggerEndboss() {

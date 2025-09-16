@@ -92,16 +92,20 @@ class StatusBar extends DrawableObject {
 
     /**
      * Resolves the correct image index based on percentage.
+     * Wichtig: Index 0 (0.png) wird NUR bei percentage === 0 gewählt.
      * @param {number} percentage - Value between 0 and 100.
      * @returns {number} Index for image array.
      */
     resolveImageIndex(percentage) {
-        if (percentage >= 100) return 5;
-        if (percentage > 80) return 4;
-        if (percentage > 60) return 3;
-        if (percentage > 40) return 2;
-        if (percentage > 20) return 1;
-        return 0;
+        // Safely clamp and round the percentage
+        const p = Math.max(0, Math.min(100, Math.round(Number(percentage) || 0)));
+
+        if (p === 0) return 0;        // genau 0 -> 0.png
+        if (p <= 20) return 1;       // 1..20 -> 20.png
+        if (p <= 40) return 2;       // 21..40 -> 40.png
+        if (p <= 60) return 3;       // 41..60 -> 60.png
+        if (p <= 80) return 4;       // 61..80 -> 80.png
+        return 5;                    // 81..100 -> 100.png
     }
 
     /* =================== Rendering =================== */
@@ -135,7 +139,12 @@ class StatusBar extends DrawableObject {
     drawBar(ctx, images, percentage, x, y) {
         const index = this.resolveImageIndex(percentage);
         const path = images[index];
-        ctx.drawImage(this.imageCache[path], x, y, this.width, this.height);
+
+        // Sicherstellen, dass das Bild im Cache ist (sonst nichts zeichnen)
+        const img = this.imageCache[path];
+        if (img) {
+            ctx.drawImage(img, x, y, this.width, this.height);
+        }
     }
 
     /* =================== Endboss Bar Handling =================== */
