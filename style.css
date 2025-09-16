@@ -26,6 +26,35 @@ body {
     font-family: myFont, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #ffb3b3;
+}
+
+a {
+    text-decoration: none;
+    color: white;
+    padding-top: 16px;
+}
+
+a:hover {
+    color: #e68900;
+}
+
+/* ------------------- Impressum ------------------- */
+
+main {
+    padding: 24px;
+    text-align: center;
+}
+
+#backBtn {
+    position: absolute;
+    left: 16px;
+}
+
 /* ------------------- Content ------------------- */
 #content {
     display: inline-block;
