@@ -5,16 +5,16 @@ let keyboard = new Keyboard();
 
 let backgroundMusic = new Audio("audio/background_music.mp3");
 backgroundMusic.loop = true;
-backgroundMusic.volume = 0.3;
+backgroundMusic.volume = 0.05;
 
 let hitSound = new Audio("audio/hit_sound.m4a");
-hitSound.volume = 0.7;
+hitSound.volume = 0.3;
 
 let winSound = new Audio("audio/win_sound.mp3");
-winSound.volume = 0.3;
+winSound.volume = 0.05;
 
 let failSound = new Audio("audio/fail_sound.mp3");
-failSound.volume = 0.4;
+failSound.volume = 0.05;
 
 /* ---- soundEnabled jetzt dauerhaft speichern ---- */
 let soundEnabled = localStorage.getItem("soundEnabled") === null 
