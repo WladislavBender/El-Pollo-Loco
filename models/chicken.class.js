@@ -15,39 +15,36 @@ class Chicken extends MovableObject {
         'img/3_enemies_chicken/chicken_normal/2_dead/dead.png'
     ];
 
-    /* =================== Initialization =================== */
     constructor() {
-        super().loadImage(this.IMAGES_WALKING[0]);
+        super();
+        this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
         this.setRandomPositionAndSpeed();
         this.animate();
     }
 
-    /* =================== Position & Speed =================== */
     setRandomPositionAndSpeed() {
         this.x = 300 + Math.random() * 2000;
         this.speed = 0.15 + Math.random() * 0.5;
     }
 
-    /* =================== Animation Loop =================== */
     animate() {
         this.startMovement();
         this.startWalkingAnimation();
     }
 
     startMovement() {
-        setInterval(() => {
-            if (this.canMove()) this.moveLeft();
+        this.movementInterval = setInterval(() => {
+            if (this.world && !this.world.paused && this.canMove()) this.moveLeft();
         }, 1000 / 60);
     }
 
     startWalkingAnimation() {
-        setInterval(() => {
-            if (this.canAnimate()) this.playAnimation(this.IMAGES_WALKING);
+        this.animationInterval = setInterval(() => {
+            if (this.world && !this.world.paused && this.canAnimate()) this.playAnimation(this.IMAGES_WALKING);
         }, 200);
     }
 
-    /* =================== State Checks =================== */
     canMove() {
         return !this.dead;
     }
@@ -56,10 +53,12 @@ class Chicken extends MovableObject {
         return !this.dead;
     }
 
-    /* =================== Death =================== */
     die() {
         this.dead = true;
         this.loadImage(this.IMAGE_DEAD[0]);
         this.speed = 0;
+
+        if (this.movementInterval) clearInterval(this.movementInterval);
+        if (this.animationInterval) clearInterval(this.animationInterval);
     }
 }

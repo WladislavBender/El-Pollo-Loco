@@ -20,6 +20,7 @@ class World {
     gameInterval = null;
     animationFrame = null;
     throwCooldown = false;
+    paused = false; // neue Property
 
     /* =================== Initialization =================== */
     constructor(canvas, keyboard) {
@@ -36,9 +37,6 @@ class World {
         this.run();
     }
 
-    /**
-     * Resets coin and bottle counters.
-     */
     resetCollectables() {
         this.bottles = 0;
         this.coins = 0;
@@ -46,23 +44,23 @@ class World {
         this.totalBottles = 10;
     }
 
-    /**
-     * Links character to world.
-     */
     setWorld() {
         this.character.world = this;
+
+        // Alle Enemies wissen jetzt, in welcher Welt sie sind
+        this.level.enemies.forEach(enemy => enemy.world = this);
     }
+
 
     /* =================== Game Loop =================== */
     run() {
         this.gameInterval = setInterval(() => {
-            if (this.gameOver) return;
+            if (this.gameOver || this.paused) return;
 
             this.checkCollisions();
             this.checkThrowObjects();
             this.triggerEndboss();
 
-            // Character Death Handling
             if (this.character.isDead() && !this.character.deathSequenceStarted) {
                 this.character.startDeath(() => {
                     if (!this.gameOver) this.endGame(false);
@@ -71,8 +69,6 @@ class World {
         }, 200);
     }
 
-
-    /* =================== Endboss Handling =================== */
     triggerEndboss() {
         let boss = this.level.enemies.find(e => e instanceof Endboss);
         if (boss && !boss.inAlert && !boss.moving && this.character.x >= 2000) {
@@ -80,7 +76,7 @@ class World {
         }
     }
 
-    /* =================== Rendering =================== */
+    /* =================== Drawing =================== */
     draw() {
         if (this.gameOver) return;
 
@@ -88,10 +84,10 @@ class World {
         this.ctx.translate(this.camera_x, 0);
 
         this.addObjectsToMap(this.level.backgroundObjects);
-        this.addObjectsToMap(this.level.clouds);   // Clouds VOR die Statusbar
+        this.addObjectsToMap(this.level.clouds);
         this.ctx.translate(-this.camera_x, 0);
 
-        this.addToMap(this.statusBar);   // Statusbar bleibt immer oben
+        this.addToMap(this.statusBar);
         this.ctx.translate(this.camera_x, 0);
 
         this.checkBottleHits();
@@ -103,9 +99,11 @@ class World {
             ...this.throwableObjects
         ]);
 
-
         this.ctx.translate(-this.camera_x, 0);
-        this.animationFrame = requestAnimationFrame(() => this.draw());
+
+        if (!this.paused) {
+            this.animationFrame = requestAnimationFrame(() => this.draw());
+        }
     }
 
     clearCanvas() {
@@ -123,7 +121,6 @@ class World {
         if (mo.otherDirection) this.flipImageBack(mo);
     }
 
-    /* =================== Flipping =================== */
     flipImage(mo) {
         this.ctx.save();
         this.ctx.translate(mo.width, 0);
@@ -136,7 +133,6 @@ class World {
         this.ctx.restore();
     }
 
-    /* =================== Clouds & Collectables =================== */
     spawnClouds() {
         let cloudsNeeded = Math.ceil(this.canvas.width / 500) + 3;
         for (let i = 0; i < cloudsNeeded; i++) {
@@ -150,16 +146,13 @@ class World {
                 new CollectableObject('bottle', Math.random() * 2000 + 200, 350)
             );
             this.collectableObjects.push(
-                // Coins höher setzen (z. B. 150 statt 300)
                 new CollectableObject('coin', Math.random() * 2000 + 200, 15 + Math.random() * 60)
             );
         }
     }
 
-
-    /* =================== Bottle Collisions =================== */
     checkBottleHits() {
-        if (this.gameOver) return;
+        if (this.gameOver || this.paused) return;
 
         this.throwableObjects.forEach((bottle, i) => {
             this.level.enemies.forEach((enemy, j) => {
@@ -177,7 +170,6 @@ class World {
         setTimeout(() => this.level.enemies.splice(idx, 1), 200);
     }
 
-
     hitEndboss(enemy) {
         enemy.hit();
         this.statusBar.setPercentage('endboss', enemy.energy);
@@ -193,8 +185,9 @@ class World {
         this.throwableObjects.splice(i, 1);
     }
 
-    /* =================== Collisions =================== */
     checkCollisions() {
+        if (this.paused) return;
+
         this.level.enemies.forEach(enemy => {
             if (!enemy.dead && this.character.isColliding(enemy)) {
                 if (enemy instanceof Endboss) {
@@ -213,7 +206,6 @@ class World {
         if (this.character.isDead()) this.endGame(false);
     }
 
-    /* =================== Collectables =================== */
     collectItem(obj) {
         if (!this.character.isCollidingCollectable(obj)) return false;
 
@@ -228,14 +220,15 @@ class World {
         this.statusBar.setPercentage(type, Math.min((this[type] / total) * 100, 100));
     }
 
-    /* =================== Throwing Bottles =================== */
     checkThrowObjects() {
+        if (this.paused) return;
+
         if (this.keyboard.D && this.bottles > 0 && !this.throwCooldown) {
             const offsetX = this.character.otherDirection ? -50 : 100;
             const bottle = new ThrowableObject(
                 this.character.x + offsetX,
                 this.character.y + 100,
-                this.character.otherDirection // Blickrichtung mitgeben
+                this.character.otherDirection
             );
 
             this.throwableObjects.push(bottle);
@@ -247,8 +240,6 @@ class World {
         }
     }
 
-
-    /* =================== Game Over Handling =================== */
     endGame(won) {
         if (this.gameOver) return;
 
@@ -284,6 +275,7 @@ class World {
 
     /* =================== Pause & Resume =================== */
     pause() {
+        this.paused = true;
         if (this.gameInterval) {
             clearInterval(this.gameInterval);
             this.gameInterval = null;
@@ -295,18 +287,8 @@ class World {
     }
 
     resume() {
+        this.paused = false;
         if (!this.gameInterval) this.run();
         if (!this.animationFrame) this.draw();
-    }
-}
-
-/* =================== Global Pause Button =================== */
-function togglePause() {
-    if (gamePaused) {
-        resumeGame();
-        document.getElementById("pause-btn").innerText = "⏸";
-    } else {
-        pauseGame();
-        document.getElementById("pause-btn").innerText = "▶️";
     }
 }

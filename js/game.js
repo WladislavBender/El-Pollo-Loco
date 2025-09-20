@@ -216,6 +216,8 @@ window.addEventListener("keydown", (e) => {
 
 /* ==================== Input Handling ==================== */
 function handleKey(event, isPressed) {
+    if (gamePaused) return; // <- Ignoriere alle Eingaben während Pause
+
     if (isRight(event)) keyboard.RIGHT = isPressed;
     if (isLeft(event)) keyboard.LEFT = isPressed;
     if (isUp(event)) keyboard.UP = isPressed;
@@ -223,6 +225,7 @@ function handleKey(event, isPressed) {
     if (isSpace(event)) keyboard.SPACE = isPressed;
     if (isThrow(event)) keyboard.D = isPressed;
 }
+
 
 function isRight(event) { return event.keyCode === 39; }
 function isLeft(event) { return event.keyCode === 37; }

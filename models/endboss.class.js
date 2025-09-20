@@ -6,8 +6,9 @@ class Endboss extends MovableObject {
     y = 55;
     x = 2500;
     energy = 100;
-    direction = -100;
-    speed = 0.25; // <-- etwas schneller als vorher (0.15)
+    // Eigenschaften
+    speed = 25;
+    direction = 0.25; // +1 rechts, -1 links    // +1 nach rechts, -1 nach links
 
     dead = false;
     inAlert = false;
@@ -143,12 +144,21 @@ class Endboss extends MovableObject {
     }
 
     /* =================== Animation & Movement =================== */
-    animate() {
-        setInterval(() => {
-            if (this.isDead()) return;
-            this.handleAnimationState();
-        }, 200);
-    }
+    // animate() {
+    //     const animateLoop = () => {
+    //         // Solange der Boss tot ist, Animation stoppen
+    //         if (this.isDead()) return;
+
+    //         // Animation nur aktualisieren, wenn World existiert und nicht pausiert
+    //         if (!this.world || !this.world.paused) {
+    //             this.handleAnimationState();
+    //         }
+
+    //         requestAnimationFrame(animateLoop);
+    //     };
+    //     animateLoop();
+    // }
+
 
     handleAnimationState() {
         if (this.isInAlert()) this.playAnimation(this.IMAGES_ALERT);
@@ -161,10 +171,24 @@ class Endboss extends MovableObject {
     }
 
     moveBetween() {
+        if (!this.world || this.world.paused) return;
+
         this.x += this.speed * this.direction;
-        if (this.isAtLeftBoundary()) this.direction = 10;
-        if (this.isAtRightBoundary()) this.direction = -10;
+
+        if (this.isAtLeftBoundary()) this.direction = 1;   // nach rechts
+        if (this.isAtRightBoundary()) this.direction = -1; // nach links
     }
+
+    // Animationen separat in Interval
+    animate() {
+        setInterval(() => {
+            if (!this.world || this.world.paused) return;
+            if (this.isDead()) return;
+
+            this.handleAnimationState();
+        }, 200); // ursprüngliche Animationsgeschwindigkeit
+    }
+
 
     isAtLeftBoundary() {
         return this.x <= 2000;

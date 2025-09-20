@@ -1,3 +1,4 @@
+/* =================== ChickenSmall Class =================== */
 class ChickenSmall extends Chicken {
     IMAGES_WALKING = [
         'img/3_enemies_chicken/chicken_small/1_walk/1_w.png',
@@ -14,7 +15,6 @@ class ChickenSmall extends Chicken {
         this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
 
-        // kleinere Maße
         this.height = 60;
         this.width = 80;
         this.y = 370;
