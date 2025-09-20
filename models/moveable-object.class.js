@@ -18,14 +18,42 @@ class MovableObject extends DrawableObject {
         return this instanceof ThrowableObject || this.y < 135;
     }
 
-    /**
-     * Gets the collision box for this object.
-     * @returns {{ x: number, y: number, w: number, h: number }} Collision box dimensions.
-     */
     getCollisionBox() {
         if (this instanceof Character) return this.getCharacterCollisionBox();
+        if (this instanceof Endboss) return this.getEndbossCollisionBox();
+        if (this instanceof ThrowableObject) return this.getBottleCollisionBox();
+
         return { x: this.x, y: this.y, w: this.width, h: this.height };
     }
+
+    /**
+     * Spezielle Hitbox für Endboss
+     */
+    getEndbossCollisionBox() {
+        const offsetX = 50;   // links und rechts enger machen
+        const offsetYTop = 40; // oben etwas wegschneiden
+        const offsetYBottom = 20; // unten etwas wegschneiden
+        return {
+            x: this.x + offsetX,
+            y: this.y + offsetYTop,
+            w: this.width - offsetX * 2,
+            h: this.height - offsetYTop - offsetYBottom
+        };
+    }
+
+    /**
+     * Spezielle Hitbox für Flaschen
+     */
+    getBottleCollisionBox() {
+        const offset = 20; // macht die Flasche schlanker
+        return {
+            x: this.x + offset,
+            y: this.y + offset,
+            w: this.width - offset * 2,
+            h: this.height - offset * 2
+        };
+    }
+
 
     /**
      * Calculates the collision box specifically for the Character.

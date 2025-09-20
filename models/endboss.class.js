@@ -7,15 +7,18 @@ class Endboss extends MovableObject {
     x = 2500;
     energy = 100;
     direction = -100;
-    speed = 0.15;
+    speed = 0.25; // <-- etwas schneller als vorher (0.15)
 
     dead = false;
     inAlert = false;
     inAttack = false;
+    inHurt = false; // <-- neuer Zustand
     moving = false;
 
     deathSequenceStarted = false;
     deathAnimationPlayed = false;
+
+    hitCounter = 0; // <-- zählt die Treffer
 
     /* =================== Image Assets =================== */
     IMAGES_WALKING = [
@@ -60,10 +63,6 @@ class Endboss extends MovableObject {
     ];
 
     /* =================== Constructor =================== */
-
-    /**
-     * Initializes the Endboss by loading all required assets.
-     */
     constructor() {
         super();
         this.loadImage(this.IMAGES_WALKING[0]);
@@ -76,14 +75,32 @@ class Endboss extends MovableObject {
     }
 
     /* =================== Combat & Damage =================== */
-
     /**
      * Reduces Endboss energy when hit.
+     * Only every 2nd hit counts!
      */
     hit() {
-        this.energy -= 20;
-        if (this.energy < 0) this.energy = 0;
+        this.hitCounter++;
+
+        if (this.hitCounter % 2 === 0) {
+            this.energy -= 20;
+            if (this.energy < 0) this.energy = 0;
+        }
+
         this.lastHit = new Date().getTime();
+        this.inHurt = true;
+
+        // Hurt-Zustand nur sehr kurz aktiv (300ms)
+        setTimeout(() => {
+            this.inHurt = false;
+        }, 300);
+    }
+
+    /**
+     * Gibt zurück, ob der Endboss gerade in Hurt-Animation ist.
+     */
+    isHurt() {
+        return this.inHurt;
     }
 
     /**
@@ -95,11 +112,6 @@ class Endboss extends MovableObject {
     }
 
     /* =================== State Handling =================== */
-
-    /**
-     * Starts alert state and activates the status bar.
-     * @param {object} statusBar - Endboss status bar reference.
-     */
     startAlert(statusBar) {
         this.inAlert = true;
         if (statusBar) statusBar.showEndbossBar();
@@ -109,47 +121,28 @@ class Endboss extends MovableObject {
         }, 1500);
     }
 
-    /**
-     * Starts movement of the Endboss.
-     */
     startMoving() {
         this.moving = true;
     }
 
-    /**
-     * Starts attack animation for a short duration.
-     */
     startAttack() {
         this.inAttack = true;
         setTimeout(() => this.inAttack = false, 1000);
     }
 
-    /**
-     * @returns {boolean} True if in alert mode.
-     */
     isInAlert() {
         return this.inAlert;
     }
 
-    /**
-     * @returns {boolean} True if attacking.
-     */
     isInAttack() {
         return this.inAttack;
     }
 
-    /**
-     * @returns {boolean} True if moving.
-     */
     isMoving() {
         return this.moving;
     }
 
     /* =================== Animation & Movement =================== */
-
-    /**
-     * Main animation loop that decides which animation to play.
-     */
     animate() {
         setInterval(() => {
             if (this.isDead()) return;
@@ -157,9 +150,6 @@ class Endboss extends MovableObject {
         }, 200);
     }
 
-    /**
-     * Handles which animation state should be played.
-     */
     handleAnimationState() {
         if (this.isInAlert()) this.playAnimation(this.IMAGES_ALERT);
         else if (this.isHurt()) this.playAnimation(this.IMAGES_HURT);
@@ -170,35 +160,21 @@ class Endboss extends MovableObject {
         }
     }
 
-    /**
-     * Moves Endboss back and forth between boundaries.
-     */
     moveBetween() {
         this.x += this.speed * this.direction;
         if (this.isAtLeftBoundary()) this.direction = 10;
         if (this.isAtRightBoundary()) this.direction = -10;
     }
 
-    /**
-     * @returns {boolean} True if at left boundary.
-     */
     isAtLeftBoundary() {
         return this.x <= 2000;
     }
 
-    /**
-     * @returns {boolean} True if at right boundary.
-     */
     isAtRightBoundary() {
         return this.x >= 2500;
     }
 
     /* =================== Death Handling =================== */
-
-    /**
-     * Starts the death sequence and triggers animation.
-     * @param {Function} onFinished - Callback after death animation ends.
-     */
     startDeath(onFinished) {
         if (this.deathSequenceStarted) return;
         this.deathSequenceStarted = true;
@@ -206,22 +182,16 @@ class Endboss extends MovableObject {
         this.playDeathAnimation(onFinished);
     }
 
-    /**
-     * Resets all states when Endboss dies.
-     */
     resetStatesOnDeath() {
         this.dead = true;
         this.speed = 0;
         this.inAlert = false;
         this.inAttack = false;
+        this.inHurt = false;
         this.moving = false;
         this.direction = 0;
     }
 
-    /**
-     * Plays the death animation sequence.
-     * @param {Function} onFinished - Callback after animation ends.
-     */
     playDeathAnimation(onFinished) {
         if (this.deathAnimationPlayed) {
             if (onFinished) onFinished();
@@ -244,10 +214,6 @@ class Endboss extends MovableObject {
         }, frameTime);
     }
 
-    /**
-     * Sets the last death frame and triggers callback.
-     * @param {Function} onFinished - Callback after last frame.
-     */
     setFinalDeathFrame(onFinished) {
         const lastPath = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
         this.img = this.imageCache[lastPath] || this.img;
