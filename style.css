@@ -41,6 +41,7 @@ a {
 
 a:hover {
     color: #e68900;
+    transform: scale(1.1);
 }
 
 .hidden {
