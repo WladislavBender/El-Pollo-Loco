@@ -173,11 +173,10 @@ class World {
     }
 
     killChicken(enemy, idx) {
-        enemy.dead = true;
-        enemy.loadImage(enemy.IMAGE_DEAD[0]);
-        enemy.speed = 0;
+        enemy.die();
         setTimeout(() => this.level.enemies.splice(idx, 1), 200);
     }
+
 
     hitEndboss(enemy) {
         enemy.hit();

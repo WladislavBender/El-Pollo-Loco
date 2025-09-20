@@ -92,10 +92,12 @@ class Character extends MovableObject {
     }
 
     /* =================== Animation Loop =================== */
+    /* =================== Animation Loop =================== */
     animate() {
-        setInterval(() => this.handleMovement(), 1000 / 60);
-        setInterval(() => this.handleAnimations(), 50);
+        setInterval(() => this.handleMovement(), 1000 / 60); // Bewegung bleibt gleich (60 FPS)
+        setInterval(() => this.handleAnimations(), 100);     // statt 50ms jetzt 100ms → langsamer
     }
+
 
     /* =================== Movement =================== */
     handleMovement() {
@@ -165,7 +167,7 @@ class Character extends MovableObject {
         } else if (kb.D) {
             this.lastMoveTime = now;
             this.playAnimation(this.IMAGES_IDLE);
-        } else if (timeSinceMove > 3000) {
+        } else if (timeSinceMove > 5000) {
             this.playAnimation(this.IMAGES_LONG_IDLE);
         } else {
             this.playAnimation(this.IMAGES_IDLE);
