@@ -232,7 +232,14 @@ class World {
     /* =================== Throwing Bottles =================== */
     checkThrowObjects() {
         if (this.keyboard.D && this.bottles > 0 && !this.throwCooldown) {
-            this.throwableObjects.push(new ThrowableObject(this.character.x + 100, this.character.y + 100));
+            const offsetX = this.character.otherDirection ? -50 : 100;
+            const bottle = new ThrowableObject(
+                this.character.x + offsetX,
+                this.character.y + 100,
+                this.character.otherDirection // Blickrichtung mitgeben
+            );
+
+            this.throwableObjects.push(bottle);
             this.bottles--;
             this.updateCollectable('bottles');
 
@@ -240,6 +247,7 @@ class World {
             setTimeout(() => this.throwCooldown = false, 300);
         }
     }
+
 
     /* =================== Game Over Handling =================== */
     endGame(won) {

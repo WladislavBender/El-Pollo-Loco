@@ -17,8 +17,8 @@ let failSound = new Audio("audio/fail_sound.mp3");
 failSound.volume = 0.05;
 
 /* ---- soundEnabled jetzt dauerhaft speichern ---- */
-let soundEnabled = localStorage.getItem("soundEnabled") === null 
-    ? true 
+let soundEnabled = localStorage.getItem("soundEnabled") === null
+    ? true
     : localStorage.getItem("soundEnabled") === "true";
 
 let gameStarted = false;
@@ -32,8 +32,34 @@ function init() {
 }
 
 function restartGame() {
-    location.reload();
+    stopMusic();
+    clearCanvas();
+
+    // Level neu aufbauen
+    initLevel();
+
+    // World neu starten
+    world = new World(canvas, keyboard);
+
+    // Status zurücksetzen
+    gameStarted = true;
+    gamePaused = false;
+
+    // Musik starten
+    startBackgroundMusic();
+
+    // Alle Overlays zurücksetzen
+    hideEndScreen();
+
+    const pauseOverlay = document.getElementById("pause-overlay");
+    if (pauseOverlay) pauseOverlay.classList.add("hidden");
+
+    // Pause-Button zurücksetzen
+    const pauseBtn = document.getElementById("pause-btn");
+    if (pauseBtn) pauseBtn.innerText = "⏸";
 }
+
+
 
 function clearCanvas() {
     const ctx = canvas.getContext('2d');
