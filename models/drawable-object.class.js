@@ -8,7 +8,7 @@ class DrawableObject {
     height = 150;
     width = 100;
 
-    debugFrames = false; // ⬅️ Debug mode: false = invisible, true = frames visible
+    debugFrames = true;
 
     /* =================== Image Loading =================== */
 
@@ -48,11 +48,13 @@ class DrawableObject {
      * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on.
      */
     drawFrame(ctx) {
-        if (this.debugFrames && (this.isCharacter() || this.isChicken())) {
+        if (this.debugFrames && (this.isCharacter() || this.isChicken() || this.isCoin() || this.isBottle())) {
             this.drawBlueFrame(ctx);
             this.drawRedFrame(ctx);
         }
     }
+
+
 
     /* =================== Type Checks =================== */
 
@@ -71,6 +73,16 @@ class DrawableObject {
     isChicken() {
         return this instanceof Chicken;
     }
+
+    isCoin() {
+        return this.type === 'coin';
+    }
+
+    isBottle() {
+        return this.type === 'bottle';
+    }
+
+
 
     /* =================== Frame Drawing =================== */
 
@@ -121,11 +133,24 @@ class DrawableObject {
      */
     getOffsets() {
         if (this.isCharacter()) {
-            return { offsetX: 20, offsetYTop: 120, offsetYBottom: 20 };
+            return { offsetX: 20, offsetYTop: 30, offsetYBottom: 20 }; // passt in height = 150
         }
         if (this.isChicken()) {
-            return { offsetX: 20, offsetYTop: 20, offsetYBottom: 20 };
+            return { offsetX: 10, offsetYTop: 10, offsetYBottom: 10 };
+        }
+        if (this.isCoin()) {
+            return { offsetX: 25, offsetYTop: 25, offsetYBottom: 25 };
+        }
+        if (this.isBottle()) {
+            return { offsetX: 5, offsetYTop: 5, offsetYBottom: 5 };
         }
         return { offsetX: 0, offsetYTop: 0, offsetYBottom: 0 };
     }
+
+
+
+
+
+
+
 }

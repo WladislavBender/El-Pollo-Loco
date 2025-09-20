@@ -146,10 +146,16 @@ class World {
 
     spawnCollectables() {
         for (let i = 0; i < 10; i++) {
-            this.collectableObjects.push(new CollectableObject('bottle', Math.random() * 2000 + 200, 350));
-            this.collectableObjects.push(new CollectableObject('coin', Math.random() * 2000 + 200, 300 + (Math.random() * 60 - 250)));
+            this.collectableObjects.push(
+                new CollectableObject('bottle', Math.random() * 2000 + 200, 350)
+            );
+            this.collectableObjects.push(
+                // Coins höher setzen (z. B. 150 statt 300)
+                new CollectableObject('coin', Math.random() * 2000 + 200, 15 + Math.random() * 60)
+            );
         }
     }
+
 
     /* =================== Bottle Collisions =================== */
     checkBottleHits() {
