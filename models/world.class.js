@@ -230,20 +230,28 @@ class World {
         if (this.paused) return;
 
         if (this.keyboard.D && this.bottles > 0 && !this.throwCooldown) {
-            const offsetX = this.character.otherDirection ? -50 : 100;
+            // Dynamische Offsets basierend auf Character-Größe
+            const handHeight = this.character.height * 0.3; // halbe Höhe
+            const sideOffset = this.character.width * 0.5;  // seitlich etwas raus
+
+            const offsetX = this.character.otherDirection ? -sideOffset : sideOffset;
+            const offsetY = handHeight;
+
             const bottle = new ThrowableObject(
                 this.character.x + offsetX,
-                this.character.y + 100,
+                this.character.y + offsetY,
                 this.character.otherDirection
             );
 
             this.throwableObjects.push(bottle);
-            this.updateCollectable('bottles', -1); // ✅ jetzt wird korrekt abgezogen
+            this.updateCollectable('bottles', -1);
 
             this.throwCooldown = true;
             setTimeout(() => this.throwCooldown = false, 300);
         }
     }
+
+
 
     endGame(won) {
         if (this.gameOver) return;
