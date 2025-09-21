@@ -146,11 +146,4 @@ class DrawableObject {
         }
         return { offsetX: 0, offsetYTop: 0, offsetYBottom: 0 };
     }
-
-
-
-
-
-
-
 }

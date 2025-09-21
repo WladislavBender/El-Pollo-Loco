@@ -51,7 +51,6 @@ class World {
         this.level.enemies.forEach(enemy => enemy.world = this);
     }
 
-
     /* =================== Game Loop =================== */
     run() {
         this.gameInterval = setInterval(() => {
@@ -209,13 +208,20 @@ class World {
     collectItem(obj) {
         if (!this.character.isCollidingCollectable(obj)) return false;
 
-        if (obj.type === 'coin') this.updateCollectable('coins');
-        if (obj.type === 'bottle' && this.bottles < this.totalBottles) this.updateCollectable('bottles');
+        if (obj.type === 'coin') this.updateCollectable('coins', +1);
+        if (obj.type === 'bottle' && this.bottles < this.totalBottles) this.updateCollectable('bottles', +1);
         return true;
     }
 
-    updateCollectable(type) {
-        this[type]++;
+    updateCollectable(type, delta) {
+        this[type] += delta;
+
+        // Grenzen einhalten (0 bis max)
+        this[type] = Math.max(0, Math.min(
+            this[type],
+            this["total" + type.charAt(0).toUpperCase() + type.slice(1)]
+        ));
+
         let total = this["total" + type.charAt(0).toUpperCase() + type.slice(1)];
         this.statusBar.setPercentage(type, Math.min((this[type] / total) * 100, 100));
     }
@@ -232,8 +238,7 @@ class World {
             );
 
             this.throwableObjects.push(bottle);
-            this.bottles--;
-            this.updateCollectable('bottles');
+            this.updateCollectable('bottles', -1); // ✅ jetzt wird korrekt abgezogen
 
             this.throwCooldown = true;
             setTimeout(() => this.throwCooldown = false, 300);
