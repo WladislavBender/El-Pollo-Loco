@@ -54,10 +54,20 @@ function restartGame() {
     const pauseOverlay = document.getElementById("pause-overlay");
     if (pauseOverlay) pauseOverlay.classList.add("hidden");
 
-    // Pause-Button zurücksetzen
+    // Pause-Button zurücksetzen & sichtbar machen
     const pauseBtn = document.getElementById("pause-btn");
-    if (pauseBtn) pauseBtn.innerText = "⏸";
+    if (pauseBtn) {
+        pauseBtn.innerText = "⏸";
+        pauseBtn.classList.remove("hidden");
+    }
+
+    // Mobile Controls wieder anzeigen (nur auf Mobile)
+    const mobileControls = document.getElementById("mobile-controls");
+    if (detectDevice() && mobileControls) {
+        mobileControls.classList.remove("hidden");
+    }
 }
+
 
 
 
@@ -130,19 +140,38 @@ function showEndScreen() {
 
 function startGame() {
     const startScreen = document.getElementById("start-screen");
+
     initLevel();
     init();
-    fadeOutStartScreen(startScreen);
+
+    // Spiel gestartet-Flag und Musik
     gameStarted = true;
     startBackgroundMusic();
 
-    document.getElementById("pause-btn").classList.remove("hidden");
+    // Pause-Button sichtbar machen
+    const pauseBtn = document.getElementById("pause-btn");
+    if (pauseBtn) pauseBtn.classList.remove("hidden");
+
+    // Startscreen ausblenden und erst NACH dem Entfernen mobile Controls anzeigen
+    fadeOutStartScreen(startScreen, () => {
+        const mobileControls = document.getElementById("mobile-controls");
+        if (detectDevice() && mobileControls) {
+            mobileControls.classList.remove("hidden");
+        }
+    });
 }
 
-function fadeOutStartScreen(startScreen) {
+
+
+function fadeOutStartScreen(startScreen, onDone) {
     startScreen.classList.add("fade-out");
-    setTimeout(() => startScreen.remove(), 1000);
+    setTimeout(() => {
+        // Element entfernen und optional Callback ausführen
+        startScreen.remove();
+        if (typeof onDone === 'function') onDone();
+    }, 1000);
 }
+
 
 
 /* ==================== Fullscreen ==================== */
@@ -275,24 +304,26 @@ function setKey(key, isPressed) {
 
 window.addEventListener("load", () => {
     const mobileControls = document.getElementById("mobile-controls");
+
+    // Mobile-Steuerung binden (nur einmal), aber NICHT anzeigen vor Spielstart
     if (detectDevice()) {
-        mobileControls.classList.remove("hidden");
         bindMobileControls();
+        if (mobileControls) mobileControls.classList.add("hidden"); // sicherstellen, dass sie versteckt sind
     } else {
-        mobileControls.classList.add("hidden");
+        if (mobileControls) mobileControls.classList.add("hidden");
     }
+
+    // Sound-Button initialisieren
+    const btn = document.getElementById("sound-btn");
+    if (btn) {
+        btn.textContent = soundEnabled ? "🔊" : "🔇";
+        if (!soundEnabled) pauseMusic();
+    }
+
+    // Orientation initial prüfen
+    handleOrientation();
 });
 
-/* ---- Button-Symbol beim Laden aktualisieren ---- */
-window.addEventListener("load", () => {
-    const btn = document.getElementById("sound-btn");
-    if (soundEnabled) {
-        btn.textContent = "🔊";
-    } else {
-        btn.textContent = "🔇";
-        pauseMusic();
-    }
-});
 
 
 /* ==================== Orientation Handling ==================== */

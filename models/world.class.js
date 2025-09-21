@@ -262,8 +262,19 @@ class World {
         clearInterval(this.gameInterval);
         cancelAnimationFrame(this.animationFrame);
 
+        // 👉 Mobile-Controls ausblenden
+        const mobileControls = document.getElementById("mobile-controls");
+        if (mobileControls) {
+            mobileControls.classList.add("hidden");
+        }
+
+        // 👉 Pause-Button ebenfalls verstecken
+        document.getElementById("pause-btn").classList.add("hidden");
+        
+
         setTimeout(() => this.drawEndScreen(), 50);
     }
+
 
     drawEndScreen() {
         const endScreen = document.getElementById("end-screen");
