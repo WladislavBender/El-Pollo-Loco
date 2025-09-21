@@ -1,4 +1,3 @@
-/* =================== DrawableObject Class =================== */
 class DrawableObject {
     img;
     imageCache = {};
@@ -7,10 +6,7 @@ class DrawableObject {
     y = 280;
     height = 150;
     width = 100;
-
     debugFrames = true;
-
-    /* =================== Image Loading =================== */
 
     /**
      * Loads a single image and assigns it to this object.
@@ -33,10 +29,8 @@ class DrawableObject {
         });
     }
 
-    /* =================== Drawing =================== */
-
     /**
-     * Draws the object on the canvas context.
+     * Draws the object on the given canvas context.
      * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on.
      */
     draw(ctx) {
@@ -44,7 +38,7 @@ class DrawableObject {
     }
 
     /**
-     * Optionally draws debug frames (blue + red) if debugFrames = true.
+     * Draws debug frames (blue + red) if debug mode is enabled.
      * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on.
      */
     drawFrame(ctx) {
@@ -53,10 +47,6 @@ class DrawableObject {
             this.drawRedFrame(ctx);
         }
     }
-
-
-
-    /* =================== Type Checks =================== */
 
     /**
      * Checks if the object is an instance of Character.
@@ -74,17 +64,21 @@ class DrawableObject {
         return this instanceof Chicken;
     }
 
+    /**
+     * Checks if the object is a coin.
+     * @returns {boolean} True if type is 'coin'.
+     */
     isCoin() {
         return this.type === 'coin';
     }
 
+    /**
+     * Checks if the object is a bottle.
+     * @returns {boolean} True if type is 'bottle'.
+     */
     isBottle() {
         return this.type === 'bottle';
     }
-
-
-
-    /* =================== Frame Drawing =================== */
 
     /**
      * Draws the blue frame representing the object’s full size.
@@ -125,25 +119,15 @@ class DrawableObject {
         };
     }
 
-    /* =================== Collision Helpers =================== */
-
     /**
      * Gets offsets for collision boxes depending on object type.
      * @returns {{ offsetX: number, offsetYTop: number, offsetYBottom: number }} Offsets for collision detection.
      */
     getOffsets() {
-        if (this.isCharacter()) {
-            return { offsetX: 20, offsetYTop: 30, offsetYBottom: 20 }; // passt in height = 150
-        }
-        if (this.isChicken()) {
-            return { offsetX: 10, offsetYTop: 10, offsetYBottom: 10 };
-        }
-        if (this.isCoin()) {
-            return { offsetX: 25, offsetYTop: 25, offsetYBottom: 25 };
-        }
-        if (this.isBottle()) {
-            return { offsetX: 5, offsetYTop: 5, offsetYBottom: 5 };
-        }
+        if (this.isCharacter()) return { offsetX: 20, offsetYTop: 30, offsetYBottom: 20 };
+        if (this.isChicken()) return { offsetX: 10, offsetYTop: 10, offsetYBottom: 10 };
+        if (this.isCoin()) return { offsetX: 25, offsetYTop: 25, offsetYBottom: 25 };
+        if (this.isBottle()) return { offsetX: 5, offsetYTop: 5, offsetYBottom: 5 };
         return { offsetX: 0, offsetYTop: 0, offsetYBottom: 0 };
     }
 }

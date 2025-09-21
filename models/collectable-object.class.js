@@ -1,4 +1,3 @@
-/* =================== CollectableObject Class =================== */
 class CollectableObject extends MovableObject {
     IMAGES_COLLECTABLE_BOTTLES = [
         'img/6_salsa_bottle/1_salsa_bottle_on_ground.png',
@@ -12,8 +11,6 @@ class CollectableObject extends MovableObject {
 
     type;
 
-    /* =================== Initialization =================== */
-
     /**
      * Creates a new collectable object (bottle or coin).
      * @param {string} type - The type of the object ('bottle' or 'coin').
@@ -25,16 +22,13 @@ class CollectableObject extends MovableObject {
         this.type = type;
         this.x = x;
         this.y = y;
-
         if (this.isBottle()) this.setupBottle();
         if (this.isCoin()) this.setupCoin();
     }
 
-    /* =================== Type Checks =================== */
-
     /**
      * Checks if the object is a bottle.
-     * @returns {boolean} True if type is 'bottle'.
+     * @returns {boolean} True if the type is 'bottle'.
      */
     isBottle() {
         return this.type === 'bottle';
@@ -42,27 +36,24 @@ class CollectableObject extends MovableObject {
 
     /**
      * Checks if the object is a coin.
-     * @returns {boolean} True if type is 'coin'.
+     * @returns {boolean} True if the type is 'coin'.
      */
     isCoin() {
         return this.type === 'coin';
     }
 
-    /* =================== Bottle Setup =================== */
-
     /**
-     * Configures a bottle with size and random image.
+     * Configures the bottle with size and random image.
      */
     setupBottle() {
         this.height = 110;
         this.width = 110;
-        const randomImg = this.getRandomBottleImage();
-        this.loadImage(randomImg);
+        this.loadImage(this.getRandomBottleImage());
     }
 
     /**
      * Returns a random bottle image from the bottle images array.
-     * @returns {string} Random bottle image path.
+     * @returns {string} A random bottle image path.
      */
     getRandomBottleImage() {
         return this.IMAGES_COLLECTABLE_BOTTLES[
@@ -70,10 +61,8 @@ class CollectableObject extends MovableObject {
         ];
     }
 
-    /* =================== Coin Setup =================== */
-
     /**
-     * Configures a coin with size and animation.
+     * Configures the coin with size, images, and starts its animation.
      */
     setupCoin() {
         this.height = 180;
@@ -84,7 +73,7 @@ class CollectableObject extends MovableObject {
     }
 
     /**
-     * Starts coin rotation animation.
+     * Starts the coin rotation animation loop.
      */
     animateCoins() {
         setInterval(() => {

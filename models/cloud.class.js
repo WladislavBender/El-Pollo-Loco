@@ -1,10 +1,8 @@
-/* =================== Cloud Class =================== */
 class Cloud extends MovableObject {
     y = 20;
     height = 250;
     width = 500;
 
-    /* =================== Cloud Images =================== */
     IMAGES_CLOUDS = [
         'img/5_background/layers/4_clouds/1.png',
         'img/5_background/layers/4_clouds/2.png'
@@ -13,10 +11,8 @@ class Cloud extends MovableObject {
     static nextImageIndex = 0;
     static lastX = 0;
 
-    /* =================== Initialization =================== */
-
     /**
-     * Creates a new Cloud instance, sets initial image and position, and starts animation.
+     * Creates a new cloud, initializes its image, position, and starts animation.
      */
     constructor() {
         super();
@@ -36,35 +32,31 @@ class Cloud extends MovableObject {
     }
 
     /**
-     * Sets the initial X position for the cloud based on the last cloud’s position.
+     * Sets the initial X position based on the last cloud’s position.
      */
     setInitialPosition() {
         this.x = Cloud.lastX;
         Cloud.lastX += this.width;
     }
 
-    /* =================== Animation Loop =================== */
-
     /**
-     * Starts continuous movement and recycling of clouds.
+     * Starts the continuous movement and recycling animation of the cloud.
      */
     animate() {
         setInterval(() => this.updateCloud(), 1000 / 60);
     }
 
     /**
-     * Updates cloud position and recycles it if it leaves the viewport.
+     * Updates the cloud's position and recycles it if it moves out of view.
      */
     updateCloud() {
         this.moveLeft();
         if (this.isOutOfView()) this.recycleCloud();
     }
 
-    /* =================== Recycling Helpers =================== */
-
     /**
      * Checks if the cloud is out of the viewport.
-     * @returns {boolean} True if cloud is fully out of view.
+     * @returns {boolean} True if the cloud is completely out of view.
      */
     isOutOfView() {
         return this.x + this.width < 0;

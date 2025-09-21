@@ -1,6 +1,4 @@
-/* =================== StatusBar Class =================== */
 class StatusBar extends DrawableObject {
-    /* =================== Properties =================== */
     IMAGES_HEALTH = [
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png',
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/20.png',
@@ -42,11 +40,12 @@ class StatusBar extends DrawableObject {
     percentageBottles = 0;
     percentageEndboss = 100;
 
-    endbossVisible = false; // ⬅️ Standardmäßig unsichtbar
-    endbossAlpha = 0;       // ⬅️ Start-Transparenz
+    endbossVisible = false;
+    endbossAlpha = 0;
 
-    /* =================== Initialization =================== */
-
+    /**
+     * Creates a new StatusBar and initializes images and size.
+     */
     constructor() {
         super();
         this.loadAllImages();
@@ -54,7 +53,7 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * Loads all status bar images into cache.
+     * Loads all images for status bars.
      */
     loadAllImages() {
         this.loadImages(this.IMAGES_HEALTH);
@@ -64,7 +63,7 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * Sets the dimensions and base position of the status bars.
+     * Sets default dimensions and position.
      */
     setDimensions() {
         this.x = 20;
@@ -73,11 +72,9 @@ class StatusBar extends DrawableObject {
         this.height = 60;
     }
 
-    /* =================== Logic =================== */
-
     /**
-     * Updates the percentage value for a given bar type.
-     * @param {'health' | 'coins' | 'bottles' | 'endboss'} type - Type of status bar.
+     * Updates percentage of a specific bar type.
+     * @param {'health'|'coins'|'bottles'|'endboss'} type - Status bar type.
      * @param {number} percentage - Value between 0 and 100.
      */
     setPercentage(type, percentage) {
@@ -91,35 +88,28 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * Resolves the correct image index based on percentage.
-     * Wichtig: Index 0 (0.png) wird NUR bei percentage === 0 gewählt.
+     * Resolves image index from percentage.
      * @param {number} percentage - Value between 0 and 100.
-     * @returns {number} Index for image array.
+     * @returns {number} Index in image array.
      */
     resolveImageIndex(percentage) {
-        // Safely clamp and round the percentage
         const p = Math.max(0, Math.min(100, Math.round(Number(percentage) || 0)));
-
-        if (p === 0) return 0;        // genau 0 -> 0.png
-        if (p <= 20) return 1;       // 1..20 -> 20.png
-        if (p <= 40) return 2;       // 21..40 -> 40.png
-        if (p <= 60) return 3;       // 41..60 -> 60.png
-        if (p <= 80) return 4;       // 61..80 -> 80.png
-        return 5;                    // 81..100 -> 100.png
+        if (p === 0) return 0;
+        if (p <= 20) return 1;
+        if (p <= 40) return 2;
+        if (p <= 60) return 3;
+        if (p <= 80) return 4;
+        return 5;
     }
 
-    /* =================== Rendering =================== */
-
     /**
-     * Draws all status bars onto the canvas.
-     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context.
+     * Draws all status bars.
+     * @param {CanvasRenderingContext2D} ctx - Canvas context.
      */
     draw(ctx) {
         this.drawBar(ctx, this.IMAGES_HEALTH, this.percentageHealth, this.x, this.y);
         this.drawBar(ctx, this.IMAGES_COINS, this.percentageCoins, this.x, this.y + this.height - 10);
         this.drawBar(ctx, this.IMAGES_BOTTLES, this.percentageBottles, this.x, this.y + (this.height - 10) * 2);
-
-        // Endboss-Bar nur, wenn sichtbar oder im Fade-In
         if (this.endbossVisible || this.endbossAlpha > 0) {
             ctx.save();
             ctx.globalAlpha = this.endbossAlpha;
@@ -129,28 +119,22 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * Draws a single status bar at given coordinates.
-     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context.
-     * @param {string[]} images - Array of image paths.
-     * @param {number} percentage - Percentage value (0–100).
-     * @param {number} x - X position.
-     * @param {number} y - Y position.
+     * Draws a single status bar.
+     * @param {CanvasRenderingContext2D} ctx - Canvas context.
+     * @param {string[]} images - Image paths.
+     * @param {number} percentage - Value between 0 and 100.
+     * @param {number} x - X coordinate.
+     * @param {number} y - Y coordinate.
      */
     drawBar(ctx, images, percentage, x, y) {
         const index = this.resolveImageIndex(percentage);
         const path = images[index];
-
-        // Sicherstellen, dass das Bild im Cache ist (sonst nichts zeichnen)
         const img = this.imageCache[path];
-        if (img) {
-            ctx.drawImage(img, x, y, this.width, this.height);
-        }
+        if (img) ctx.drawImage(img, x, y, this.width, this.height);
     }
 
-    /* =================== Endboss Bar Handling =================== */
-
     /**
-     * Makes the Endboss bar visible and starts fade-in animation.
+     * Shows Endboss bar and triggers fade-in.
      */
     showEndbossBar() {
         this.endbossVisible = true;
@@ -158,7 +142,7 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * Fades in the Endboss bar smoothly.
+     * Fades in the Endboss bar.
      */
     animateEndbossFadeIn() {
         let fadeInterval = setInterval(() => {

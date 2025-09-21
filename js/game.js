@@ -1,4 +1,3 @@
-/* ==================== Global Variables ==================== */
 let canvas;
 let world;
 let keyboard = new Keyboard();
@@ -16,7 +15,6 @@ winSound.volume = 0.05;
 let failSound = new Audio("audio/fail_sound.mp3");
 failSound.volume = 0.05;
 
-/* ---- soundEnabled jetzt dauerhaft speichern ---- */
 let soundEnabled = localStorage.getItem("soundEnabled") === null
     ? true
     : localStorage.getItem("soundEnabled") === "true";
@@ -24,88 +22,100 @@ let soundEnabled = localStorage.getItem("soundEnabled") === null
 let gameStarted = false;
 let gamePaused = false;
 
-
-/* ==================== Initialization ==================== */
+/** Initializes the canvas and game world */
 function init() {
     canvas = document.getElementById('canvas');
     world = new World(canvas, keyboard);
 }
 
+/** Restarts the game */
 function restartGame() {
     stopMusic();
     clearCanvas();
-
-    // Level neu aufbauen
     initLevel();
+    init();
+    resetGameState();
+    startBackgroundMusic();
+    hideEndScreen();
+    hidePauseOverlay();
+    resetPauseButton();
+    showMobileControls();
+}
 
-    // World neu starten
-    world = new World(canvas, keyboard);
+/** Clears the game canvas */
+function clearCanvas() {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
-    // Status zurücksetzen
+/** Resets game state flags */
+function resetGameState() {
     gameStarted = true;
     gamePaused = false;
+}
 
-    // Musik starten
-    startBackgroundMusic();
-
-    // Alle Overlays zurücksetzen
-    hideEndScreen();
-
+/** Hides the pause overlay */
+function hidePauseOverlay() {
     const pauseOverlay = document.getElementById("pause-overlay");
     if (pauseOverlay) pauseOverlay.classList.add("hidden");
+}
 
-    // Pause-Button zurücksetzen & sichtbar machen
+/** Resets and shows the pause button */
+function resetPauseButton() {
     const pauseBtn = document.getElementById("pause-btn");
     if (pauseBtn) {
         pauseBtn.innerText = "⏸";
         pauseBtn.classList.remove("hidden");
     }
+}
 
-    // Mobile Controls wieder anzeigen (nur auf Mobile)
+/** Shows mobile controls if device is detected as mobile */
+function showMobileControls() {
     const mobileControls = document.getElementById("mobile-controls");
     if (detectDevice() && mobileControls) {
         mobileControls.classList.remove("hidden");
     }
 }
 
-
-
-
-function clearCanvas() {
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-
-/* ==================== Music & Sound ==================== */
+/** Stops background music */
 function stopMusic() {
     backgroundMusic.pause();
     backgroundMusic.currentTime = 0;
 }
 
+/** Pauses background music */
 function pauseMusic() {
     backgroundMusic.pause();
 }
 
+/** Resumes background music if enabled */
 function resumeMusic() {
     if (soundEnabled && gameStarted && backgroundMusic.paused) {
-        backgroundMusic.play().catch(err => console.log("Autoplay blockiert:", err));
+        backgroundMusic.play().catch(err => console.log("Autoplay blocked:", err));
     }
 }
 
+/** Starts background music from the beginning */
 function startBackgroundMusic() {
     if (soundEnabled) {
         backgroundMusic.currentTime = 0;
-        backgroundMusic.play().catch(err => console.log("Autoplay blockiert:", err));
+        backgroundMusic.play().catch(err => console.log("Autoplay blocked:", err));
     }
 }
 
-/* ---- Sound umschalten + speichern ---- */
+/** Toggles sound on/off and saves preference */
 function toggleSound() {
     const btn = document.getElementById("sound-btn");
     soundEnabled = !soundEnabled;
     localStorage.setItem("soundEnabled", soundEnabled);
+    updateSoundButton(btn);
+}
 
+/**
+ * Updates sound button appearance
+ * @param {HTMLElement} btn - Sound toggle button
+ */
+function updateSoundButton(btn) {
     if (soundEnabled) {
         btn.textContent = "🔊";
         if (gameStarted) resumeMusic();
@@ -115,22 +125,23 @@ function toggleSound() {
     }
 }
 
+/** Plays hit sound effect */
 function playHitSound() {
     if (soundEnabled) {
         let sfx = hitSound.cloneNode();
         sfx.volume = hitSound.volume;
-        sfx.play().catch(err => console.log("Hit sound blockiert:", err));
+        sfx.play().catch(err => console.log("Hit sound blocked:", err));
     }
 }
 
-
-/* ==================== Screens ==================== */
+/** Hides the end screen */
 function hideEndScreen() {
     const endScreen = document.getElementById("end-screen");
     endScreen.classList.remove("show");
     endScreen.classList.add("hidden");
 }
 
+/** Shows the end screen */
 function showEndScreen() {
     const endScreen = document.getElementById("end-screen");
     endScreen.classList.remove("hidden");
@@ -138,43 +149,37 @@ function showEndScreen() {
     stopMusic();
 }
 
+/** Starts the game */
 function startGame() {
     const startScreen = document.getElementById("start-screen");
-
     initLevel();
     init();
-
-    // Spiel gestartet-Flag und Musik
     gameStarted = true;
     startBackgroundMusic();
-
-    // Pause-Button sichtbar machen
-    const pauseBtn = document.getElementById("pause-btn");
-    if (pauseBtn) pauseBtn.classList.remove("hidden");
-
-    // Startscreen ausblenden und erst NACH dem Entfernen mobile Controls anzeigen
-    fadeOutStartScreen(startScreen, () => {
-        const mobileControls = document.getElementById("mobile-controls");
-        if (detectDevice() && mobileControls) {
-            mobileControls.classList.remove("hidden");
-        }
-    });
+    showPauseButton();
+    fadeOutStartScreen(startScreen, showMobileControls);
 }
 
+/** Displays the pause button */
+function showPauseButton() {
+    const pauseBtn = document.getElementById("pause-btn");
+    if (pauseBtn) pauseBtn.classList.remove("hidden");
+}
 
-
+/**
+ * Fades out start screen
+ * @param {HTMLElement} startScreen - Start screen element
+ * @param {Function} onDone - Callback after removal
+ */
 function fadeOutStartScreen(startScreen, onDone) {
     startScreen.classList.add("fade-out");
     setTimeout(() => {
-        // Element entfernen und optional Callback ausführen
         startScreen.remove();
         if (typeof onDone === 'function') onDone();
     }, 1000);
 }
 
-
-
-/* ==================== Fullscreen ==================== */
+/** Toggles fullscreen mode */
 function toggleFullscreen() {
     const content = document.getElementById("content");
     const title = document.querySelector("#content h1");
@@ -185,15 +190,25 @@ function toggleFullscreen() {
     }
 }
 
+/** Checks if fullscreen mode is active */
 function isFullscreen() {
     return document.fullscreenElement;
 }
 
+/**
+ * Enters fullscreen mode
+ * @param {HTMLElement} content - Game container element
+ * @param {HTMLElement} title - Title element
+ */
 function enterFullscreen(content, title) {
     content.requestFullscreen().catch(err => console.error(`Fullscreen error: ${err.message}`));
     if (title) title.style.display = "none";
 }
 
+/**
+ * Shows the title element
+ * @param {HTMLElement} title - Title element
+ */
 function showTitle(title) {
     title.style.display = "block";
 }
@@ -203,13 +218,13 @@ document.addEventListener("fullscreenchange", () => {
     if (!isFullscreen() && title) showTitle(title);
 });
 
-
-/* ==================== Pause / Resume ==================== */
+/** Updates pause button appearance */
 function updatePauseButton() {
     const btn = document.getElementById("pause-btn");
     btn.innerText = gamePaused ? "▶️" : "⏸";
 }
 
+/** Pauses the game */
 function pauseGame() {
     if (world && !gamePaused) {
         gamePaused = true;
@@ -220,6 +235,7 @@ function pauseGame() {
     }
 }
 
+/** Resumes the game */
 function resumeGame() {
     if (world && gamePaused) {
         gamePaused = false;
@@ -230,6 +246,7 @@ function resumeGame() {
     }
 }
 
+/** Toggles between pause and resume */
 function togglePause() {
     if (gamePaused) {
         resumeGame();
@@ -242,11 +259,13 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") togglePause();
 });
 
-
-/* ==================== Input Handling ==================== */
+/**
+ * Handles key press/release
+ * @param {KeyboardEvent} event 
+ * @param {boolean} isPressed 
+ */
 function handleKey(event, isPressed) {
-    if (gamePaused) return; // <- Ignoriere alle Eingaben während Pause
-
+    if (gamePaused) return;
     if (isRight(event)) keyboard.RIGHT = isPressed;
     if (isLeft(event)) keyboard.LEFT = isPressed;
     if (isUp(event)) keyboard.UP = isPressed;
@@ -254,7 +273,6 @@ function handleKey(event, isPressed) {
     if (isSpace(event)) keyboard.SPACE = isPressed;
     if (isThrow(event)) keyboard.D = isPressed;
 }
-
 
 function isRight(event) { return event.keyCode === 39; }
 function isLeft(event) { return event.keyCode === 37; }
@@ -266,14 +284,14 @@ function isThrow(event) { return event.keyCode === 68; }
 window.addEventListener("keydown", (event) => handleKey(event, true));
 window.addEventListener("keyup", (event) => handleKey(event, false));
 
-
-/* ==================== Mobile Controls ==================== */
+/** Detects if device is mobile */
 function detectDevice() {
     const isMobileUA = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     return (isMobileUA || isTouch);
 }
 
+/** Binds mobile control buttons */
 function bindMobileControls() {
     const controls = [
         { id: "btn-left", key: "LEFT" },
@@ -281,18 +299,28 @@ function bindMobileControls() {
         { id: "btn-jump", key: "SPACE" },
         { id: "btn-throw", key: "D" }
     ];
-
-    controls.forEach(control => {
-        const btn = document.getElementById(control.id);
-        btn.addEventListener("touchstart", (e) => { e.preventDefault(); setKey(control.key, true); });
-        btn.addEventListener("mousedown", (e) => { e.preventDefault(); setKey(control.key, true); });
-        btn.addEventListener("touchend", (e) => { e.preventDefault(); setKey(control.key, false); });
-        btn.addEventListener("mouseup", (e) => { e.preventDefault(); setKey(control.key, false); });
-        btn.addEventListener("touchcancel", () => setKey(control.key, false));
-        btn.addEventListener("mouseleave", () => setKey(control.key, false));
-    });
+    controls.forEach(control => bindControl(control));
 }
 
+/**
+ * Binds a single control button
+ * @param {{id: string, key: string}} control 
+ */
+function bindControl(control) {
+    const btn = document.getElementById(control.id);
+    btn.addEventListener("touchstart", e => { e.preventDefault(); setKey(control.key, true); });
+    btn.addEventListener("mousedown", e => { e.preventDefault(); setKey(control.key, true); });
+    btn.addEventListener("touchend", e => { e.preventDefault(); setKey(control.key, false); });
+    btn.addEventListener("mouseup", e => { e.preventDefault(); setKey(control.key, false); });
+    btn.addEventListener("touchcancel", () => setKey(control.key, false));
+    btn.addEventListener("mouseleave", () => setKey(control.key, false));
+}
+
+/**
+ * Sets a keyboard key state
+ * @param {string} key 
+ * @param {boolean} isPressed 
+ */
 function setKey(key, isPressed) {
     switch (key) {
         case 'LEFT': keyboard.LEFT = isPressed; break;
@@ -304,33 +332,24 @@ function setKey(key, isPressed) {
 
 window.addEventListener("load", () => {
     const mobileControls = document.getElementById("mobile-controls");
-
-    // Mobile-Steuerung binden (nur einmal), aber NICHT anzeigen vor Spielstart
     if (detectDevice()) {
         bindMobileControls();
-        if (mobileControls) mobileControls.classList.add("hidden"); // sicherstellen, dass sie versteckt sind
+        if (mobileControls) mobileControls.classList.add("hidden");
     } else {
         if (mobileControls) mobileControls.classList.add("hidden");
     }
-
-    // Sound-Button initialisieren
     const btn = document.getElementById("sound-btn");
     if (btn) {
         btn.textContent = soundEnabled ? "🔊" : "🔇";
         if (!soundEnabled) pauseMusic();
     }
-
-    // Orientation initial prüfen
     handleOrientation();
 });
 
-
-
-/* ==================== Orientation Handling ==================== */
+/** Handles device orientation */
 function handleOrientation() {
     const isMobile = detectDevice();
     const overlay = document.getElementById("rotate-overlay");
-
     if (isMobile) {
         if (window.matchMedia("(orientation: landscape)").matches) {
             overlay.classList.add("hidden");
@@ -343,10 +362,11 @@ function handleOrientation() {
     }
 }
 
+/** Exits fullscreen mode if active */
 function exitFullscreenIfActive() {
     if (document.fullscreenElement) {
         document.exitFullscreen().catch(err =>
-            console.error("Konnte Fullscreen nicht verlassen:", err)
+            console.error("Could not exit fullscreen:", err)
         );
     }
 }
@@ -355,10 +375,7 @@ window.addEventListener("orientationchange", handleOrientation);
 window.addEventListener("resize", handleOrientation);
 window.addEventListener("load", handleOrientation);
 
-
-/* ==================== System Events ==================== */
 window.addEventListener("beforeunload", () => stopMusic());
-
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
         pauseMusic();

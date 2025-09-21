@@ -1,6 +1,4 @@
-/* =================== MovableObject Class =================== */
 class MovableObject extends DrawableObject {
-    /* =================== Properties =================== */
     speed = 0.15;
     otherDirection = false;
     speedY = 0;
@@ -8,31 +6,33 @@ class MovableObject extends DrawableObject {
     energy = 100;
     lastHit = 0;
 
-    /* =================== Collision Handling =================== */
-
     /**
-     * Checks if the object is above ground (jumping/falling).
+     * Checks if the object is above ground.
      * @returns {boolean} True if above ground.
      */
     isAboveGround() {
         return this instanceof ThrowableObject || this.y < 135;
     }
 
+    /**
+     * Gets the collision box depending on object type.
+     * @returns {{ x:number, y:number, w:number, h:number }} Collision box.
+     */
     getCollisionBox() {
         if (this instanceof Character) return this.getCharacterCollisionBox();
         if (this instanceof Endboss) return this.getEndbossCollisionBox();
         if (this instanceof ThrowableObject) return this.getBottleCollisionBox();
-
         return { x: this.x, y: this.y, w: this.width, h: this.height };
     }
 
     /**
-     * Spezielle Hitbox für Endboss
+     * Gets collision box for Endboss.
+     * @returns {{ x:number, y:number, w:number, h:number }} Collision box.
      */
     getEndbossCollisionBox() {
-        const offsetX = 50;   // links und rechts enger machen
-        const offsetYTop = 40; // oben etwas wegschneiden
-        const offsetYBottom = 20; // unten etwas wegschneiden
+        const offsetX = 50;
+        const offsetYTop = 40;
+        const offsetYBottom = 20;
         return {
             x: this.x + offsetX,
             y: this.y + offsetYTop,
@@ -42,10 +42,11 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * Spezielle Hitbox für Flaschen
+     * Gets collision box for ThrowableObject (bottle).
+     * @returns {{ x:number, y:number, w:number, h:number }} Collision box.
      */
     getBottleCollisionBox() {
-        const offset = 20; // macht die Flasche schlanker
+        const offset = 20;
         return {
             x: this.x + offset,
             y: this.y + offset,
@@ -54,10 +55,9 @@ class MovableObject extends DrawableObject {
         };
     }
 
-
     /**
-     * Calculates the collision box specifically for the Character.
-     * @returns {{ x: number, y: number, w: number, h: number }} Collision box dimensions for Character.
+     * Gets collision box for Character.
+     * @returns {{ x:number, y:number, w:number, h:number }} Collision box.
      */
     getCharacterCollisionBox() {
         const offsetX = 20;
@@ -85,7 +85,7 @@ class MovableObject extends DrawableObject {
     /**
      * Checks collision with a collectable object.
      * @param {DrawableObject} mo - Collectable object.
-     * @returns {boolean} True if colliding with collectable.
+     * @returns {boolean} True if colliding.
      */
     isCollidingCollectable(mo) {
         const a = this.getCollisionBox();
@@ -95,9 +95,9 @@ class MovableObject extends DrawableObject {
 
     /**
      * Checks if two collision boxes overlap.
-     * @param {{x:number, y:number, w:number, h:number}} a - First collision box.
-     * @param {{x:number, y:number, w:number, h:number}} b - Second collision box.
-     * @returns {boolean} True if boxes overlap.
+     * @param {{x:number, y:number, w:number, h:number}} a - First box.
+     * @param {{x:number, y:number, w:number, h:number}} b - Second box.
+     * @returns {boolean} True if overlapping.
      */
     boxesOverlap(a, b) {
         return a.x + a.w > b.x &&
@@ -106,10 +106,8 @@ class MovableObject extends DrawableObject {
             a.y < b.y + b.h;
     }
 
-    /* =================== Gravity & Movement =================== */
-
     /**
-     * Continuously applies gravity to the object.
+     * Starts gravity application loop.
      */
     applyGravity() {
         setInterval(() => {
@@ -148,13 +146,11 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * Makes the object jump by applying upward speed.
+     * Makes the object jump.
      */
     jump() {
         this.speedY = 6;
     }
-
-    /* =================== Combat & Damage =================== */
 
     /**
      * Applies damage to the object.
@@ -165,25 +161,23 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * Checks if the object is currently hurt (recently hit).
-     * @returns {boolean} True if hurt within last 1.5 seconds.
+     * Checks if object is hurt within 1.5s.
+     * @returns {boolean} True if recently hit.
      */
     isHurt() {
         return (new Date().getTime() - this.lastHit) / 1000 < 1.5;
     }
 
     /**
-     * Checks if the object is dead.
+     * Checks if object is dead.
      * @returns {boolean} True if energy is 0.
      */
     isDead() {
         return this.energy === 0;
     }
 
-    /* =================== Animation =================== */
-
     /**
-     * Plays an animation sequence by cycling through images.
+     * Plays an animation sequence.
      * @param {string[]} images - Array of image paths.
      */
     playAnimation(images) {
