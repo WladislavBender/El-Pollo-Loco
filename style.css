@@ -27,6 +27,8 @@ body {
 }
 
 footer {
+    position: absolute;
+    bottom: 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -35,7 +37,7 @@ footer {
 
 a {
     text-decoration: none;
-    color: white;
+    color: rgb(249, 81, 9);
     padding-top: 16px;
 }
 
@@ -57,7 +59,11 @@ main {
 
 #backBtn {
     position: absolute;
+    top: 16px;
     left: 16px;
+    background: beige;
+    padding: 12px;
+    border-radius: 36px;
 }
 
 /* ------------------- Content ------------------- */
