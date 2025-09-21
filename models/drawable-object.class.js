@@ -6,7 +6,7 @@ class DrawableObject {
     y = 280;
     height = 150;
     width = 100;
-    debugFrames = true;
+    debugFrames = false;
 
     /**
      * Loads a single image and assigns it to this object.
