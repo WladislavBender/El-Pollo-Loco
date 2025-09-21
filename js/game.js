@@ -331,6 +331,7 @@ function setKey(key, isPressed) {
 }
 
 window.addEventListener("load", () => {
+    applyVolume();
     const mobileControls = document.getElementById("mobile-controls");
     if (detectDevice()) {
         bindMobileControls();
@@ -383,3 +384,69 @@ document.addEventListener("visibilitychange", () => {
         resumeMusic();
     }
 });
+
+
+let lastOverlay = null; // speichert, von wo Settings geöffnet wurde
+let gameVolume = localStorage.getItem("gameVolume") !== null
+    ? parseFloat(localStorage.getItem("gameVolume"))
+    : 0.5;
+
+/** Wendet die gespeicherte Lautstärke auf alle Sounds an */
+function applyVolume() {
+    backgroundMusic.volume = gameVolume;
+    hitSound.volume = gameVolume * 0.6;
+    winSound.volume = gameVolume;
+    failSound.volume = gameVolume;
+}
+
+/** Öffnet das Settings-Overlay */
+function openSettings(fromOverlayId) {
+    lastOverlay = fromOverlayId;
+    document.getElementById(fromOverlayId).classList.add("hidden");
+    document.getElementById("settings-overlay").classList.remove("hidden");
+
+    const slider = document.getElementById("volume-slider");
+    slider.value = gameVolume;
+    slider.addEventListener("input", (e) => {
+        gameVolume = parseFloat(e.target.value);
+        localStorage.setItem("gameVolume", gameVolume);
+        applyVolume();
+    });
+}
+
+/** Schließt Settings und kehrt zurück zum vorherigen Overlay */
+function closeSettings() {
+    document.getElementById("settings-overlay").classList.add("hidden");
+    if (lastOverlay) {
+        document.getElementById(lastOverlay).classList.remove("hidden");
+    }
+}
+
+/** Zurück zum Startscreen */
+function returnToMenu() {
+    stopMusic();
+    clearCanvas();
+    gameStarted = false;
+    gamePaused = false;
+
+    // Overlays zurücksetzen
+    document.getElementById("pause-overlay").classList.add("hidden");
+    document.getElementById("end-screen").classList.add("hidden");
+    document.getElementById("pause-btn").classList.add("hidden");
+    document.getElementById("mobile-controls").classList.add("hidden");
+
+    // prüfen, ob Start-Screen schon existiert
+    if (document.getElementById("start-screen")) return;
+
+    // Startscreen neu erstellen
+    const startScreen = document.createElement("div");
+    startScreen.id = "start-screen";
+    startScreen.innerHTML = `
+        <div class="overlay-content">
+            <button id="start-btn" onclick="startGame()">Start</button>
+            <button id="start-btn" onclick="openSettings('start-screen')">Settings</button>
+        </div>
+    `;
+    document.getElementById("content").appendChild(startScreen);
+}
+

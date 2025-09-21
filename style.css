@@ -146,7 +146,8 @@ canvas:fullscreen {
 
 #content:fullscreen #start-screen,
 #content:fullscreen #end-screen,
-#content:fullscreen #pause-overlay {
+#content:fullscreen #pause-overlay,
+#content:fullscreen #settings-overlay {
     top: 0;
     left: 0;
     width: 100vw;
@@ -265,6 +266,68 @@ h1 {
     width: 698px;
 }
 
+/* Settings Overlay */
+#settings-overlay {
+    background: rgba(0, 0, 0, 0.6);
+    /* halbtransparenter Hintergrund */
+    border: 6px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 166px;
+    left: 0;
+    width: 720px;
+    height: 480px;
+    z-index: 20;
+}
+
+#settings-overlay.hidden {
+    display: none;
+}
+
+#settings-overlay h2 {
+    color: white;
+    margin-bottom: 20px;
+}
+
+#settings-overlay label {
+    color: white;
+    font-size: 18px;
+}
+
+#settings-overlay input[type="range"] {
+    width: 60%;
+    margin-top: 10px;
+}
+
+/* Buttons im Settings Overlay */
+#settings-overlay button {
+    background: #ff9800;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 12px 24px;
+    margin-top: 20px;
+    transition: transform 0.2s, background 0.2s;
+}
+
+#settings-overlay button:hover {
+    background: #e68900;
+    transform: scale(1.05);
+}
+
+/* Vollbild-Anpassung
+#content:fullscreen #settings-overlay {
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    border: none;
+} */
+
 @media (max-width: 1366px) {
     .instructions {
         display: none;
@@ -299,7 +362,8 @@ screen and (max-height: 680px) and (orientation: landscape) {
     #canvas-container,
     #start-screen,
     #end-screen,
-    #pause-overlay {
+    #pause-overlay,
+    #settings-overlay {
         width: 100vw;
         height: 100vh;
         top: 0;
