@@ -74,8 +74,14 @@ class DrawableObject {
     getOffsets() {
         if (this.isCharacter()) return { offsetX: 20, offsetYTop: 30, offsetYBottom: 50 };
         if (this.isChicken()) return { offsetX: 10, offsetYTop: 10, offsetYBottom: 10 };
-        if (this.isCoin()) return { offsetX: 25, offsetYTop: 25, offsetYBottom: 25 };
-        if (this.isBottle()) return { offsetX: 5, offsetYTop: 5, offsetYBottom: 5 };
+
+        // Coins enger machen
+        if (this.isCoin()) return { offsetX: 10, offsetYTop: 10, offsetYBottom: 10 };
+
+        // Bottles auch enger machen
+        if (this.isBottle()) return { offsetX: 3, offsetYTop: 3, offsetYBottom: 3 };
+
         return { offsetX: 0, offsetYTop: 0, offsetYBottom: 0 };
     }
+
 }

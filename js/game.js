@@ -128,11 +128,14 @@ function updateSoundButton(btn) {
 /** Plays hit sound effect */
 function playHitSound() {
     if (soundEnabled) {
-        let sfx = hitSound.cloneNode();
-        sfx.volume = hitSound.volume;
-        sfx.play().catch(err => console.log("Hit sound blocked:", err));
+        if (hitSound.paused || hitSound.ended) {
+            hitSound.currentTime = 0; // von vorne abspielen
+            hitSound.play().catch(err => console.log("Hit sound blocked:", err));
+        }
+        // Falls der Sound gerade spielt → NICHT erneut starten
     }
 }
+
 
 /** Hides the end screen */
 function hideEndScreen() {

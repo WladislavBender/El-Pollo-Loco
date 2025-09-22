@@ -20,11 +20,9 @@ class MovableObject extends DrawableObject {
      */
     getCollisionBox() {
         if (this instanceof Character) {
-            // Character-Box enger machen, vor allem unten,
-            // damit man beim "von oben springen" nicht zu früh Schaden nimmt
-            const offsetX = 30;       // schmaler, damit die Arme nicht zählen
-            const offsetYTop = 110;    // oberer Teil ausblenden (Kopf/Hut/Haare)
-            const offsetYBottom = 10; // Füße etwas wegnehmen, damit Bodenkontakt sauber bleibt
+            const offsetX = 30;       // Seiten enger
+            const offsetYTop = 110;   // Kopf/Hut/Haare ignorieren
+            const offsetYBottom = 10; // Füße minimal freilassen
             return {
                 x: this.x + offsetX,
                 y: this.y + offsetYTop,
@@ -37,10 +35,9 @@ class MovableObject extends DrawableObject {
         if (this instanceof ThrowableObject) return this.getBottleCollisionBox();
 
         if (this instanceof Chicken || this instanceof ChickenSmall) {
-            // Chickens enger machen → Trefferbereich "Körpermitte"
-            const offsetX = 10;       // Seiten wegschneiden (Flügel)
-            const offsetYTop = 5;    // oberhalb vom Kopf etwas frei lassen
-            const offsetYBottom = 15; // unten freier Bereich, damit Sprung zuverlässiger zählt
+            const offsetX = 20;        // Seiten kürzen (Flügel)
+            const offsetYTop = 5;      // Kopf etwas frei
+            const offsetYBottom = 15;  // unten freier → Jump zuverlässiger
             return {
                 x: this.x + offsetX,
                 y: this.y + offsetYTop,
@@ -49,15 +46,16 @@ class MovableObject extends DrawableObject {
             };
         }
 
+        // Coins & Bottles (Collectables) über type prüfen
+        if (this.type === 'coin') return this.getCoinCollisionBox();
+        if (this.type === 'bottle') return this.getBottleCollectableCollisionBox();
+
         // Default: volle Box
         return { x: this.x, y: this.y, w: this.width, h: this.height };
     }
 
-
-
     /**
      * Gets collision box for Endboss.
-     * @returns {{ x:number, y:number, w:number, h:number }} Collision box.
      */
     getEndbossCollisionBox() {
         const offsetX = 50;
@@ -72,8 +70,7 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * Gets collision box for ThrowableObject (bottle).
-     * @returns {{ x:number, y:number, w:number, h:number }} Collision box.
+     * Gets collision box for ThrowableObject (flying bottle).
      */
     getBottleCollisionBox() {
         const offset = 20;
@@ -87,7 +84,6 @@ class MovableObject extends DrawableObject {
 
     /**
      * Gets collision box for Character.
-     * @returns {{ x:number, y:number, w:number, h:number }} Collision box.
      */
     getCharacterCollisionBox() {
         const offsetX = 20;
@@ -102,9 +98,34 @@ class MovableObject extends DrawableObject {
     }
 
     /**
+      * Gets collision box for Coin (collectable).
+      */
+    getCoinCollisionBox() {
+        const offset = 60; // vorher 10 → kleinerer Sammelbereich
+        return {
+            x: this.x + offset,
+            y: this.y + offset,
+            w: this.width - offset * 2,
+            h: this.height - offset * 2
+        };
+    }
+
+    /**
+     * Gets collision box for Bottle (collectable).
+     */
+    getBottleCollectableCollisionBox() {
+        const offsetX = 40; // vorher 8 → enger an den Flaschenkörper
+        const offsetY = 10; // vorher 15 → enger oben/unten
+        return {
+            x: this.x + offsetX,
+            y: this.y + offsetY,
+            w: this.width - offsetX * 2,
+            h: this.height - offsetY * 2
+        };
+    }
+
+    /**
      * Checks collision with another movable object.
-     * @param {MovableObject} mo - Another movable object.
-     * @returns {boolean} True if colliding.
      */
     isColliding(mo) {
         const a = this.getCollisionBox();
@@ -114,8 +135,6 @@ class MovableObject extends DrawableObject {
 
     /**
      * Checks collision with a collectable object.
-     * @param {DrawableObject} mo - Collectable object.
-     * @returns {boolean} True if colliding.
      */
     isCollidingCollectable(mo) {
         const a = this.getCollisionBox();
@@ -125,9 +144,6 @@ class MovableObject extends DrawableObject {
 
     /**
      * Checks if two collision boxes overlap.
-     * @param {{x:number, y:number, w:number, h:number}} a - First box.
-     * @param {{x:number, y:number, w:number, h:number}} b - Second box.
-     * @returns {boolean} True if overlapping.
      */
     boxesOverlap(a, b) {
         return a.x + a.w > b.x &&
@@ -147,59 +163,38 @@ class MovableObject extends DrawableObject {
         this.prevY = this.y;
     }
 
-    /**
-     * Checks if gravity should be applied.
-     * @returns {boolean} True if above ground or moving vertically.
-     */
     shouldApplyGravity() {
         return this.isAboveGround() || this.speedY > 0;
     }
 
-    /**
-     * Applies vertical movement (jump/fall).
-     */
     applyVerticalMovement() {
         this.y -= this.speedY;
         this.speedY -= this.acceleration;
     }
 
-    /**
-     * Moves object to the right.
-     */
     moveRight() {
         this.x += this.speed;
     }
 
-    /**
-     * Moves object to the left.
-     */
     moveLeft() {
         this.x -= this.speed;
     }
 
-    /**
-     * Makes the object jump.
-     */
     jump() {
         this.speedY = 6;
     }
 
     /**
-     * Applies damage to the object.
+     * Applies damage to the object depending on attacker type.
      */
-    /**
- * Applies damage to the object depending on attacker type.
- * @param {MovableObject} attacker - Enemy that caused the hit.
- */
     hit(attacker) {
-        // Character hat eigene Hit-Logik → hier überspringen
         if (this instanceof Character) return;
 
         let damage = 1;
         if (attacker instanceof Chicken || attacker instanceof ChickenSmall) {
             damage = 1;
         } else if (attacker instanceof Endboss) {
-            damage = 0; // nur für andere Objekte relevant
+            damage = 0;
         }
 
         this.energy = Math.max(0, this.energy - damage);
@@ -208,38 +203,22 @@ class MovableObject extends DrawableObject {
         }
     }
 
-
-
-    /**
-     * Checks if object is hurt within 1.5s.
-     * @returns {boolean} True if recently hit.
-     */
     isHurt() {
         return (new Date().getTime() - this.lastHit) / 1000 < 1.5;
     }
 
-    /**
-     * Checks if object is dead.
-     * @returns {boolean} True if energy is 0.
-     */
     isDead() {
         return this.energy === 0;
     }
 
-    /**
-     * Plays an animation sequence.
-     * @param {string[]} images - Array of image paths.
-     */
     playAnimation(images) {
         this.img = this.imageCache[images[this.currentImage % images.length]];
         this.currentImage++;
     }
 
     /**
- * Prüft, ob der Character von oben auf einen Enemy springt.
- * @param {Chicken|ChickenSmall} enemy 
- * @returns {boolean}
- */
+     * Prüft, ob der Character von oben auf einen Enemy springt.
+     */
     isJumpingOn(enemy) {
         const charBox = this.getCollisionBox();
         const charPrevBox = {
@@ -263,7 +242,4 @@ class MovableObject extends DrawableObject {
 
         return horizontalOverlap && wasAbove && nowTouchesTop && movingDown;
     }
-
-
-
 }
