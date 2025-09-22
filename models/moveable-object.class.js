@@ -143,6 +143,8 @@ class MovableObject extends DrawableObject {
         setInterval(() => {
             if (this.shouldApplyGravity()) this.applyVerticalMovement();
         }, 100 / 25);
+
+        this.prevY = this.y;
     }
 
     /**
@@ -221,39 +223,29 @@ class MovableObject extends DrawableObject {
  * @returns {boolean}
  */
     isJumpingOn(enemy) {
-        // Use same offsets as getCharacterCollisionBox() in MovableObject
-        const offsetX = 20;
-        const offsetYTop = 120;
-        const offsetYBottom = 20;
-
-        // aktuelle Collision-Box des Char
-        const charBox = this.getCollisionBox(); // { x, y, w, h }   (MovableObject.getCharacterCollisionBox)
-        // vorherige Collision-Box (berechnet aus prevY)
+        const charBox = this.getCollisionBox();
         const charPrevBox = {
-            x: this.x + offsetX,
-            y: this.prevY + offsetYTop,
-            w: this.width - offsetX * 2,
-            h: this.height - offsetYTop - offsetYBottom
+            x: this.prevX,
+            y: this.prevY,
+            w: this.width,
+            h: this.height
         };
-
-        const enemyBox = enemy.getCollisionBox(); // erwartet { x, y, w, h }
+        const enemyBox = enemy.getCollisionBox();
 
         const horizontalOverlap =
             charBox.x + charBox.w > enemyBox.x &&
             charBox.x < enemyBox.x + enemyBox.w;
 
-        // war der Character vorher oberhalb der Kopfkante des Enemys?
-        const wasAbove = (charPrevBox.y + charPrevBox.h) <= (enemyBox.y + 8); // 8px tolerance
+        const wasAbove = (charPrevBox.y + charPrevBox.h) <= (enemyBox.y + 15);
+        const nowTouchesTop =
+            (charBox.y + charBox.h) >= enemyBox.y &&
+            (charPrevBox.y + charPrevBox.h) <= (enemyBox.y + 40);
 
-        // jetzt berührt der Character die obere Kante des Enemys (oder hat sie gerade überschritten)
-        const nowTouchesTop = (charBox.y + charBox.h) >= (enemyBox.y) &&
-            (charPrevBox.y + charPrevBox.h) <= (enemyBox.y + 30); // 30px grace
-
-        // Character muss sich nach unten bewegen (speedY < 0 in deiner Gravilogik)
         const movingDown = this.speedY < 0;
 
         return horizontalOverlap && wasAbove && nowTouchesTop && movingDown;
     }
+
 
 
 }

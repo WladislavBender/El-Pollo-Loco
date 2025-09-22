@@ -56,14 +56,18 @@ class World {
      * Runs the game loop periodically.
      */
     run() {
-        this.gameInterval = setInterval(() => {
-            if (this.gameOver || this.paused) return;
-            this.checkCollisions();
-            this.checkThrowObjects();
-            this.triggerEndboss();
-            this.handleCharacterDeath();
-        }, 200);
+        const gameLoop = () => {
+            if (!this.gameOver && !this.paused) {
+                this.checkCollisions();     // Kollisionslogik pro Frame
+                this.checkThrowObjects();
+                this.triggerEndboss();
+                this.handleCharacterDeath();
+            }
+            requestAnimationFrame(gameLoop); // Endlosschleife über Frames
+        };
+        requestAnimationFrame(gameLoop);
     }
+
 
     /**
      * Triggers the endboss alert sequence.
