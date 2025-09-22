@@ -18,9 +18,9 @@ class World {
     paused = false;
 
     /**
-     * Initializes the world with a canvas and keyboard input.
-     * @param {HTMLCanvasElement} canvas - The canvas element.
-     * @param {Object} keyboard - The keyboard input handler.
+     * Initializes the world with canvas and keyboard.
+     * @param {HTMLCanvasElement} canvas
+     * @param {Keyboard} keyboard
      */
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
@@ -34,9 +34,7 @@ class World {
         this.run();
     }
 
-    /**
-     * Resets collected items to initial state.
-     */
+    /** Resets collected items. */
     resetCollectables() {
         this.bottles = 0;
         this.coins = 0;
@@ -44,34 +42,27 @@ class World {
         this.totalBottles = 10;
     }
 
-    /**
-     * Assigns world references to character and enemies.
-     */
+    /** Assigns world references to character and enemies. */
     setWorld() {
         this.character.world = this;
         this.level.enemies.forEach(enemy => enemy.world = this);
     }
 
-    /**
-     * Runs the game loop periodically.
-     */
+    /** Main game loop. */
     run() {
-        const gameLoop = () => {
+        const loop = () => {
             if (!this.gameOver && !this.paused) {
-                this.checkCollisions();     // Kollisionslogik pro Frame
+                this.checkCollisions();
                 this.checkThrowObjects();
                 this.triggerEndboss();
                 this.handleCharacterDeath();
             }
-            requestAnimationFrame(gameLoop); // Endlosschleife über Frames
+            requestAnimationFrame(loop);
         };
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(loop);
     }
 
-
-    /**
-     * Triggers the endboss alert sequence.
-     */
+    /** Alerts the endboss if player reaches trigger point. */
     triggerEndboss() {
         let boss = this.level.enemies.find(e => e instanceof Endboss);
         if (boss && !boss.inAlert && !boss.moving && this.character.x >= 2000) {
@@ -79,20 +70,14 @@ class World {
         }
     }
 
-    /**
-     * Handles character death sequence.
-     */
+    /** Starts death sequence if character is dead. */
     handleCharacterDeath() {
         if (this.character.isDead() && !this.character.deathSequenceStarted) {
-            this.character.startDeath(() => {
-                if (!this.gameOver) this.endGame(false);
-            });
+            this.character.startDeath(() => !this.gameOver && this.endGame(false));
         }
     }
 
-    /**
-     * Main draw loop for rendering objects.
-     */
+    /** Rendering loop. */
     draw() {
         if (this.gameOver) return;
         this.clearCanvas();
@@ -110,29 +95,25 @@ class World {
             ...this.throwableObjects
         ]);
         this.ctx.translate(-this.camera_x, 0);
-        if (!this.paused) {
-            this.animationFrame = requestAnimationFrame(() => this.draw());
-        }
+        if (!this.paused) this.animationFrame = requestAnimationFrame(() => this.draw());
     }
 
-    /**
-     * Clears the entire canvas.
-     */
+    /** Clears canvas. */
     clearCanvas() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     /**
-     * Adds multiple objects to the map.
-     * @param {Array} objects - Array of game objects.
+     * Adds multiple objects to canvas.
+     * @param {Array} objects
      */
     addObjectsToMap(objects) {
         objects.forEach(o => this.addToMap(o));
     }
 
     /**
-     * Adds a single object to the map.
-     * @param {Object} mo - Movable object.
+     * Draws object with optional flip.
+     * @param {Object} mo
      */
     addToMap(mo) {
         if (mo.otherDirection) this.flipImage(mo);
@@ -141,10 +122,7 @@ class World {
         if (mo.otherDirection) this.flipImageBack(mo);
     }
 
-    /**
-     * Flips an object horizontally.
-     * @param {Object} mo - Movable object.
-     */
+    /** Flips image horizontally. */
     flipImage(mo) {
         this.ctx.save();
         this.ctx.translate(mo.width, 0);
@@ -152,42 +130,27 @@ class World {
         mo.x *= -1;
     }
 
-    /**
-     * Restores an object's orientation.
-     * @param {Object} mo - Movable object.
-     */
+    /** Restores flipped image. */
     flipImageBack(mo) {
         mo.x *= -1;
         this.ctx.restore();
     }
 
-    /**
-     * Spawns clouds across the level.
-     */
+    /** Spawns clouds. */
     spawnClouds() {
         let cloudsNeeded = Math.ceil(this.canvas.width / 500) + 3;
-        for (let i = 0; i < cloudsNeeded; i++) {
-            this.level.clouds.push(new Cloud());
-        }
+        for (let i = 0; i < cloudsNeeded; i++) this.level.clouds.push(new Cloud());
     }
 
-    /**
-     * Spawns collectible objects in the world.
-     */
+    /** Spawns collectible items. */
     spawnCollectables() {
         for (let i = 0; i < 10; i++) {
-            this.collectableObjects.push(
-                new CollectableObject("bottle", Math.random() * 2000 + 200, 350)
-            );
-            this.collectableObjects.push(
-                new CollectableObject("coin", Math.random() * 2000 + 200, 15 + Math.random() * 60)
-            );
+            this.collectableObjects.push(new CollectableObject("bottle", Math.random() * 2000 + 200, 350));
+            this.collectableObjects.push(new CollectableObject("coin", Math.random() * 2000 + 200, 15 + Math.random() * 60));
         }
     }
 
-    /**
-     * Checks if thrown bottles hit enemies.
-     */
+    /** Checks bottle collisions with enemies. */
     checkBottleHits() {
         if (this.gameOver || this.paused) return;
         this.throwableObjects.forEach((bottle, i) => {
@@ -201,9 +164,9 @@ class World {
 
     /**
      * Handles bottle impact with enemies.
-     * @param {Object} enemy - Enemy hit.
-     * @param {number} j - Enemy index.
-     * @param {number} i - Bottle index.
+     * @param {Object} enemy
+     * @param {number} j
+     * @param {number} i
      */
     handleBottleImpact(enemy, j, i) {
         if (enemy instanceof Chicken) this.killChicken(enemy, j);
@@ -211,41 +174,27 @@ class World {
         this.removeBottle(i);
     }
 
-    /**
-     * Kills a chicken enemy.
-     * @param {Object} enemy - Chicken enemy.
-     * @param {number} idx - Index of enemy.
-     */
+    /** Removes bottle by index. */
+    removeBottle(i) {
+        this.throwableObjects.splice(i, 1);
+    }
+
+    /** Kills chicken enemy. */
     killChicken(enemy, idx) {
         enemy.die();
         setTimeout(() => this.level.enemies.splice(idx, 1), 200);
     }
 
-    /**
-     * Handles when the endboss is hit.
-     * @param {Object} enemy - Endboss enemy.
-     */
+    /** Handles Endboss hit. */
     hitEndboss(enemy) {
         enemy.hit();
         this.statusBar.setPercentage("endboss", enemy.energy);
         if (enemy.isDead() && !enemy.deathSequenceStarted) {
-            enemy.startDeath(() => {
-                if (!this.gameOver) this.endGame(true);
-            });
+            enemy.startDeath(() => !this.gameOver && this.endGame(true));
         }
     }
 
-    /**
-     * Removes a thrown bottle from the list.
-     * @param {number} i - Index of bottle.
-     */
-    removeBottle(i) {
-        this.throwableObjects.splice(i, 1);
-    }
-
-    /**
-     * Checks collisions between character, enemies, and collectables.
-     */
+    /** Collision checks for character, enemies, collectables. */
     checkCollisions() {
         if (this.paused) return;
         this.level.enemies.forEach((enemy, idx) => this.handleEnemyCollision(enemy, idx));
@@ -254,92 +203,73 @@ class World {
     }
 
     /**
-     * Handles collision with an enemy.
-     * @param {Object} enemy - The enemy object.
+     * Handles collision with enemy.
+     * @param {Object} enemy
+     * @param {number} idx
      */
     handleEnemyCollision(enemy, idx) {
-        if (!enemy.dead && this.character.isColliding(enemy)) {
-            if (enemy instanceof Endboss) {
-                enemy.startAttack();
-                this.character.hit(enemy); // nutzt invincibilityDuration + Damage aus Character.hit()
-                this.statusBar.setPercentage("health", this.character.energy);
-                playHitSound();
-                return;
-            }
+        if (enemy.dead || !this.character.isColliding(enemy)) return;
+        if (enemy instanceof Endboss) return this.hitByEndboss(enemy);
+        if (this.character.isJumpingOn(enemy)) return this.landOnEnemy(enemy, idx);
+        this.takeDamageFromEnemy(enemy);
+    }
 
-            // Wenn der Character von oben landet -> kill
-            if (this.character.isJumpingOn(enemy)) {
-                // benutze vorhandene killChicken (entfernt nach kurzer Zeit)
-                if (enemy instanceof Chicken) {
-                    this.killChicken(enemy, idx);
-                    this.character.speedY = 6; // kleiner Hüpfer nach dem Kill
-                } else {
-                    // Fallback
-                    enemy.die();
-                }
-            } else {
-                // sonst Schaden für den Character
-                this.character.hit(enemy);
-                this.statusBar.setPercentage("health", this.character.energy);
-                playHitSound();
-            }
+    /** Endboss collision damage. */
+    hitByEndboss(enemy) {
+        enemy.startAttack();
+        this.character.hit(enemy);
+        this.statusBar.setPercentage("health", this.character.energy);
+        playHitSound();
+    }
+
+    /** Handles landing on enemy. */
+    landOnEnemy(enemy, idx) {
+        if (enemy instanceof Chicken) {
+            this.killChicken(enemy, idx);
+            this.character.speedY = 6;
+        } else {
+            enemy.die();
         }
     }
 
-
+    /** Damage when colliding without jumping. */
+    takeDamageFromEnemy(enemy) {
+        this.character.hit(enemy);
+        this.statusBar.setPercentage("health", this.character.energy);
+        playHitSound();
+    }
 
     /**
-     * Collects a coin or bottle if collided.
-     * @param {Object} obj - Collectable object.
-     * @returns {boolean} True if collected.
+     * Collects items if collided.
+     * @param {Object} obj
+     * @returns {boolean}
      */
     collectItem(obj) {
         if (!this.character.isCollidingCollectable(obj)) return false;
         if (obj.type === "coin") this.updateCollectable("coins", +1);
-        if (obj.type === "bottle" && this.bottles < this.totalBottles) {
-            this.updateCollectable("bottles", +1);
-        }
+        if (obj.type === "bottle" && this.bottles < this.totalBottles) this.updateCollectable("bottles", +1);
         return true;
     }
 
-    /**
-     * Updates the number of collected items and updates status bar.
-     * @param {string} type - Type of collectable.
-     * @param {number} delta - Value to change.
-     */
+    /** Updates collectable counters. */
     updateCollectable(type, delta) {
         this[type] += delta;
-        this[type] = Math.max(0, Math.min(
-            this[type],
-            this["total" + type.charAt(0).toUpperCase() + type.slice(1)]
-        ));
-        let total = this["total" + type.charAt(0).toUpperCase() + type.slice(1)];
-        this.statusBar.setPercentage(type, Math.min((this[type] / total) * 100, 100));
+        let cap = this["total" + type.charAt(0).toUpperCase() + type.slice(1)];
+        this[type] = Math.max(0, Math.min(this[type], cap));
+        this.statusBar.setPercentage(type, Math.min((this[type] / cap) * 100, 100));
     }
 
-    /**
-     * Checks if character throws bottles.
-     */
+    /** Checks if player throws bottles. */
     checkThrowObjects() {
         if (this.paused) return;
-        if (this.keyboard.D && this.bottles > 0 && !this.throwCooldown) {
-            this.throwBottle();
-        }
+        if (this.keyboard.D && this.bottles > 0 && !this.throwCooldown) this.throwBottle();
     }
 
-    /**
-     * Creates and throws a bottle object.
-     */
+    /** Creates and throws bottle. */
     throwBottle() {
-        const handHeight = this.character.height * 0.3;
-        const sideOffset = this.character.width * 0.5;
-        const offsetX = this.character.otherDirection ? -sideOffset : sideOffset;
-        const offsetY = handHeight;
-        const bottle = new ThrowableObject(
-            this.character.x + offsetX,
-            this.character.y + offsetY,
-            this.character.otherDirection
-        );
+        const offsetX = this.character.otherDirection ? -this.character.width * 0.5 : this.character.width * 0.5;
+        const offsetY = this.character.height * 0.3;
+        const bottle = new ThrowableObject(this.character.x + offsetX, this.character.y + offsetY, this.character.otherDirection);
         this.throwableObjects.push(bottle);
         this.updateCollectable("bottles", -1);
         this.throwCooldown = true;
@@ -347,8 +277,8 @@ class World {
     }
 
     /**
-     * Ends the game with win or loss state.
-     * @param {boolean} won - True if player won.
+     * Ends the game.
+     * @param {boolean} won
      */
     endGame(won) {
         if (this.gameOver) return;
@@ -360,18 +290,14 @@ class World {
         setTimeout(() => this.drawEndScreen(), 50);
     }
 
-    /**
-     * Hides on-screen controls after game ends.
-     */
+    /** Hides controls. */
     hideControls() {
         const mobileControls = document.getElementById("mobile-controls");
         if (mobileControls) mobileControls.classList.add("hidden");
         document.getElementById("pause-btn").classList.add("hidden");
     }
 
-    /**
-     * Draws the end screen after the game ends.
-     */
+    /** Draws end screen. */
     drawEndScreen() {
         const endScreen = document.getElementById("end-screen");
         endScreen.style.backgroundImage = this.getEndscreenImage();
@@ -381,28 +307,21 @@ class World {
         if (soundEnabled) this.playEndSound();
     }
 
-    /**
-     * Plays the win or fail sound.
-     */
+    /** Plays win/fail sound. */
     playEndSound() {
         let sound = this.gameWon ? winSound : failSound;
         sound.currentTime = 0;
         sound.play().catch(err => console.log("Sound blocked:", err));
     }
 
-    /**
-     * Returns the correct image for the end screen.
-     * @returns {string} The background image URL.
-     */
+    /** Returns endscreen image URL. */
     getEndscreenImage() {
         return this.gameWon
             ? "url('img/You won, you lost/You won A.png')"
             : "url('img/You won, you lost/You lost.png')";
     }
 
-    /**
-     * Pauses the game loop and animations.
-     */
+    /** Pauses game loop. */
     pause() {
         this.paused = true;
         if (this.gameInterval) {
@@ -415,9 +334,7 @@ class World {
         }
     }
 
-    /**
-     * Resumes the game loop and animations.
-     */
+    /** Resumes game loop. */
     resume() {
         this.paused = false;
         if (!this.gameInterval) this.run();

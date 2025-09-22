@@ -54,7 +54,7 @@ class Endboss extends MovableObject {
     ];
 
     /**
-     * Creates an instance of Endboss and loads images.
+     * Creates an instance of Endboss and loads its images.
      */
     constructor() {
         super();
@@ -111,7 +111,7 @@ class Endboss extends MovableObject {
 
     /**
      * Activates alert mode and starts moving after delay.
-     * @param {Object} statusBar
+     * @param {Object} statusBar - The status bar instance.
      */
     startAlert(statusBar) {
         this.inAlert = true;
@@ -137,29 +137,14 @@ class Endboss extends MovableObject {
         setTimeout(() => this.inAttack = false, 1000);
     }
 
-    /**
-     * Returns whether the Endboss is in alert state.
-     * @returns {boolean}
-     */
-    isInAlert() {
-        return this.inAlert;
-    }
+    /** @returns {boolean} */
+    isInAlert() { return this.inAlert; }
 
-    /**
-     * Returns whether the Endboss is in attack state.
-     * @returns {boolean}
-     */
-    isInAttack() {
-        return this.inAttack;
-    }
+    /** @returns {boolean} */
+    isInAttack() { return this.inAttack; }
 
-    /**
-     * Returns whether the Endboss is moving.
-     * @returns {boolean}
-     */
-    isMoving() {
-        return this.moving;
-    }
+    /** @returns {boolean} */
+    isMoving() { return this.moving; }
 
     /**
      * Handles animation states based on current status.
@@ -195,25 +180,15 @@ class Endboss extends MovableObject {
         }, 200);
     }
 
-    /**
-     * Checks if Endboss reached left boundary.
-     * @returns {boolean}
-     */
-    isAtLeftBoundary() {
-        return this.x <= 2000;
-    }
+    /** @returns {boolean} */
+    isAtLeftBoundary() { return this.x <= 2000; }
 
-    /**
-     * Checks if Endboss reached right boundary.
-     * @returns {boolean}
-     */
-    isAtRightBoundary() {
-        return this.x >= 2500;
-    }
+    /** @returns {boolean} */
+    isAtRightBoundary() { return this.x >= 2500; }
 
     /**
      * Initiates death sequence.
-     * @param {Function} onFinished
+     * @param {Function} onFinished - Callback when finished.
      */
     startDeath(onFinished) {
         if (this.deathSequenceStarted) return;
@@ -237,11 +212,19 @@ class Endboss extends MovableObject {
 
     /**
      * Plays death animation sequence.
-     * @param {Function} onFinished
+     * @param {Function} onFinished - Callback when finished.
      */
     playDeathAnimation(onFinished) {
         if (this.deathAnimationPlayed) return this.finishDeath(onFinished);
         this.deathAnimationPlayed = true;
+        this.startDeathFrames(onFinished);
+    }
+
+    /**
+     * Iterates through death frames with a timed loop.
+     * @param {Function} onFinished - Callback when finished.
+     */
+    startDeathFrames(onFinished) {
         let i = 0;
         const interval = setInterval(() => {
             this.showDeathFrame(i);
@@ -255,7 +238,7 @@ class Endboss extends MovableObject {
 
     /**
      * Displays a single frame of the death animation.
-     * @param {number} i
+     * @param {number} i - Frame index.
      */
     showDeathFrame(i) {
         const path = this.IMAGES_DEAD[i];
@@ -264,7 +247,7 @@ class Endboss extends MovableObject {
 
     /**
      * Ensures final frame is shown and callback executed.
-     * @param {Function} onFinished
+     * @param {Function} onFinished - Callback when finished.
      */
     setFinalDeathFrame(onFinished) {
         const lastPath = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
@@ -274,7 +257,7 @@ class Endboss extends MovableObject {
 
     /**
      * Completes death sequence if already played.
-     * @param {Function} onFinished
+     * @param {Function} onFinished - Callback when finished.
      */
     finishDeath(onFinished) {
         if (onFinished) onFinished();

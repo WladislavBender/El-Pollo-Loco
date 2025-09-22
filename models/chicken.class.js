@@ -15,8 +15,8 @@ class Chicken extends MovableObject {
     ];
 
     /**
-     * Creates a new chicken enemy with randomized position and speed.
-     * Loads walking images and starts its animation cycle.
+     * Creates a new chicken with random position and speed.
+     * Loads walking images and starts animations.
      */
     constructor() {
         super();
@@ -27,7 +27,7 @@ class Chicken extends MovableObject {
     }
 
     /**
-     * Sets a random spawn position and speed for the chicken.
+     * Sets a random x-position and movement speed.
      */
     setRandomPositionAndSpeed() {
         this.x = 300 + Math.random() * 2000;
@@ -35,7 +35,7 @@ class Chicken extends MovableObject {
     }
 
     /**
-     * Starts movement and walking animations for the chicken.
+     * Starts all chicken animations.
      */
     animate() {
         this.startMovement();
@@ -43,50 +43,45 @@ class Chicken extends MovableObject {
     }
 
     /**
-     * Starts continuous left movement if the chicken is alive and the game is not paused.
+     * Continuously moves chicken left if alive and game not paused.
      */
     startMovement() {
         this.movementInterval = setInterval(() => {
-            if (this.world && !this.world.paused && this.canMove()) {
-                this.moveLeft();
-            }
+            if (this.isActive()) this.moveLeft();
         }, 1000 / 60);
     }
 
     /**
-     * Starts walking animation if the chicken is alive and the game is not paused.
+     * Plays walking animation if alive and game not paused.
      */
     startWalkingAnimation() {
         this.animationInterval = setInterval(() => {
-            if (this.world && !this.world.paused && this.canAnimate()) {
-                this.playAnimation(this.IMAGES_WALKING);
-            }
+            if (this.isActive()) this.playAnimation(this.IMAGES_WALKING);
         }, 200);
     }
 
     /**
-     * Checks if the chicken can still move.
-     * @returns {boolean} True if the chicken is not dead.
+     * Returns true if chicken can move or animate.
+     * @returns {boolean}
      */
-    canMove() {
-        return !this.dead;
+    isActive() {
+        return this.world && !this.world.paused && !this.dead;
     }
 
     /**
-     * Checks if the chicken can still animate.
-     * @returns {boolean} True if the chicken is not dead.
-     */
-    canAnimate() {
-        return !this.dead;
-    }
-
-    /**
-     * Handles the death of the chicken by stopping animations and movement.
+     * Kills chicken, stops animations and movement.
      */
     die() {
         this.dead = true;
         this.loadImage(this.IMAGE_DEAD[0]);
         this.speed = 0;
+        this.stopIntervals();
+    }
+
+    /**
+     * Clears all active intervals for movement and animation.
+     */
+    stopIntervals() {
         if (this.movementInterval) clearInterval(this.movementInterval);
         if (this.animationInterval) clearInterval(this.animationInterval);
     }

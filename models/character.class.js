@@ -9,10 +9,10 @@ class Character extends MovableObject {
     deathAnimationPlayed = false;
 
     isHurtActive = false;
-    hurtDuration = 600; // ms - Dauer der Hurt-Animation
+    hurtDuration = 600;
     invincibilityDuration = 50;
     lastHitTime = 0;
-
+    prevY = this.y;
 
     IMAGES_IDLE = [
         'img/2_character_pepe/1_idle/idle/I-1.png', 'img/2_character_pepe/1_idle/idle/I-2.png',
@@ -57,23 +57,18 @@ class Character extends MovableObject {
     ];
 
     /**
-     * Initializes the character with images, gravity, and animation.
+     * Initializes the character with default image, gravity, and animations.
      */
     constructor() {
         super().loadImage('img/2_character_pepe/2_walk/W-21.png');
         this.loadAllImages();
         this.applyGravity();
-        this.lastMoveTime = new Date().getTime();
-
-        // <-- neue Variable zum Vergleichen der vorherigen Y-Position
-        this.prevY = this.y;
-
+        this.lastMoveTime = Date.now();
         this.animate();
     }
 
-
     /**
-     * Loads all image sets for character animations.
+     * Loads all image sets for animations.
      */
     loadAllImages() {
         this.loadImages(this.IMAGES_IDLE);
@@ -85,7 +80,7 @@ class Character extends MovableObject {
     }
 
     /**
-     * Starts animation intervals for movement and state animations.
+     * Starts animation intervals for movement and states.
      */
     animate() {
         setInterval(() => this.handleMovement(), 1000 / 60);
@@ -99,8 +94,7 @@ class Character extends MovableObject {
         if (!this.world?.keyboard) return;
         this.prevY = this.y;
         const kb = this.world.keyboard;
-        let moved = false;
-        moved = this.processHorizontalMovement(kb) || moved;
+        let moved = this.processHorizontalMovement(kb);
         moved = this.processJump(kb) || moved;
         this.updateCamera();
         if (moved || kb.D) this.updateLastMoveTime();
@@ -109,26 +103,32 @@ class Character extends MovableObject {
     /**
      * Processes horizontal movement.
      * @param {Object} kb - Keyboard state.
-     * @returns {boolean} Whether movement occurred.
+     * @returns {boolean}
      */
     processHorizontalMovement(kb) {
-        if (kb.RIGHT && this.canMoveRight()) {
-            this.moveRight();
-            this.otherDirection = false;
-            return true;
-        }
-        if (kb.LEFT && this.canMoveLeft()) {
-            this.moveLeft();
-            this.otherDirection = true;
-            return true;
-        }
+        if (kb.RIGHT && this.canMoveRight()) return this.moveRightAndFace();
+        if (kb.LEFT && this.canMoveLeft()) return this.moveLeftAndFace();
         return false;
     }
 
+    /** Moves right and updates facing direction. */
+    moveRightAndFace() {
+        this.moveRight();
+        this.otherDirection = false;
+        return true;
+    }
+
+    /** Moves left and updates facing direction. */
+    moveLeftAndFace() {
+        this.moveLeft();
+        this.otherDirection = true;
+        return true;
+    }
+
     /**
-     * Processes jump movement.
+     * Processes jump input.
      * @param {Object} kb - Keyboard state.
-     * @returns {boolean} Whether jump occurred.
+     * @returns {boolean}
      */
     processJump(kb) {
         if (kb.SPACE && this.canJump()) {
@@ -138,113 +138,90 @@ class Character extends MovableObject {
         return false;
     }
 
-    /**
-     * Updates camera position relative to character.
-     */
+    /** Updates camera position. */
     updateCamera() {
         this.world.camera_x = -this.x + 100;
     }
 
-    /**
-     * Updates timestamp of the last movement.
-     */
+    /** Updates timestamp of last movement. */
     updateLastMoveTime() {
-        this.lastMoveTime = new Date().getTime();
+        this.lastMoveTime = Date.now();
     }
 
-    /**
-     * Checks if movement to the right is allowed.
-     * @returns {boolean}
-     */
-    canMoveRight() {
-        return this.x < this.world.level.level_end_x;
-    }
+    /** @returns {boolean} Whether right movement is allowed. */
+    canMoveRight() { return this.x < this.world.level.level_end_x; }
+
+    /** @returns {boolean} Whether left movement is allowed. */
+    canMoveLeft() { return this.x > 0; }
+
+    /** @returns {boolean} Whether character can jump. */
+    canJump() { return !this.isAboveGround(); }
 
     /**
-     * Checks if movement to the left is allowed.
-     * @returns {boolean}
-     */
-    canMoveLeft() {
-        return this.x > 0;
-    }
-
-    /**
-     * Checks if character can jump.
-     * @returns {boolean}
-     */
-    canJump() {
-        return !this.isAboveGround();
-    }
-
-    /**
-     * Handles animation states based on conditions.
+     * Handles animation states.
      */
     handleAnimations() {
         if (!this.world?.keyboard) return;
         const kb = this.world.keyboard;
-
         if (this.isDead()) return;
-        if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT); // nutzt MovableObject.isHurt()
+        if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT);
         if (this.isAboveGround()) return this.playAnimation(this.IMAGES_JUMPING);
-
         this.handleGroundAnimations(kb);
     }
 
-
     /**
-     * Handles animations when character is on the ground.
+     * Handles ground animations based on movement and idle state.
      * @param {Object} kb - Keyboard state.
      */
     handleGroundAnimations(kb) {
-        const now = new Date().getTime();
-        const timeSinceMove = now - (this.lastMoveTime || now);
+        const now = Date.now();
+        const idleTime = now - (this.lastMoveTime || now);
         if (kb.RIGHT || kb.LEFT) return this.playAnimation(this.IMAGES_WALKING);
-        if (kb.D) {
-            this.lastMoveTime = now;
-            return this.playAnimation(this.IMAGES_IDLE);
-        }
-        if (timeSinceMove > 5000) return this.playAnimation(this.IMAGES_LONG_IDLE);
+        if (kb.D) return this.idleOnThrow(now);
+        if (idleTime > 5000) return this.playAnimation(this.IMAGES_LONG_IDLE);
         this.playAnimation(this.IMAGES_IDLE);
     }
 
-    /**
-     * Checks if character is dead.
-     * @returns {boolean}
-     */
-    isDead() {
-        return this.energy <= 0;
+    /** Plays idle animation while throwing. */
+    idleOnThrow(now) {
+        this.lastMoveTime = now;
+        return this.playAnimation(this.IMAGES_IDLE);
     }
 
+    /** @returns {boolean} Whether character is dead. */
+    isDead() { return this.energy <= 0; }
+
+    /**
+     * Handles being hit by an attacker.
+     * @param {Object} attacker - Enemy or object causing damage.
+     */
     hit(attacker) {
         const now = Date.now();
-        if (now - this.lastHitTime < this.invincibilityDuration) {
-            return; // noch unverwundbar
-        }
-
-        let damage = 5; // Standard
-
-        if (attacker instanceof Chicken || attacker instanceof ChickenSmall) {
-            damage = 1;
-        } else if (attacker instanceof Endboss) {
-            damage = attacker.damage; // <-- dynamisch aus Endboss-Klasse
-        }
-
+        if (now - this.lastHitTime < this.invincibilityDuration) return;
+        const damage = this.calculateDamage(attacker);
         this.energy = Math.max(0, this.energy - damage);
         this.lastHitTime = now;
-
         this.isHurtActive = true;
         setTimeout(() => this.isHurtActive = false, this.hurtDuration);
     }
 
-
-    isHurt() {
-        return this.isHurtActive;
+    /**
+     * Calculates damage based on attacker type.
+     * @param {Object} attacker
+     * @returns {number}
+     */
+    calculateDamage(attacker) {
+        if (attacker instanceof Chicken || attacker instanceof ChickenSmall) return 1;
+        if (attacker instanceof Endboss) return attacker.damage;
+        return 5;
     }
 
+    /** @returns {boolean} Whether character is hurt. */
+    isHurt() { return this.isHurtActive; }
 
     /**
-     * Starts death sequence and animation.
-     * @param {Function} onFinished - Callback after death animation.
+     * Starts death sequence.
+     * @param {Function} onFinished - Callback when finished.
      */
     startDeath(onFinished) {
         if (this.deathSequenceStarted) return;
@@ -255,19 +232,15 @@ class Character extends MovableObject {
 
     /**
      * Plays death animation frames.
-     * @param {Function} onFinished - Callback after animation.
+     * @param {Function} onFinished - Callback when finished.
      */
     playDeathAnimation(onFinished) {
-        if (this.deathAnimationPlayed) {
-            if (onFinished) onFinished();
-            return;
-        }
+        if (this.deathAnimationPlayed) return onFinished?.();
         this.deathAnimationPlayed = true;
         let i = 0;
         const frameTime = 200;
         const interval = setInterval(() => {
-            this.updateDeathFrame(i);
-            i++;
+            this.updateDeathFrame(i++);
             if (i >= this.IMAGES_DEAD.length) {
                 clearInterval(interval);
                 this.setFinalDeathFrame(onFinished);
@@ -276,8 +249,8 @@ class Character extends MovableObject {
     }
 
     /**
-     * Updates current death frame image.
-     * @param {number} index - Frame index.
+     * Updates current death frame.
+     * @param {number} index
      */
     updateDeathFrame(index) {
         const path = this.IMAGES_DEAD[index];
@@ -286,11 +259,11 @@ class Character extends MovableObject {
 
     /**
      * Sets final death frame and triggers callback.
-     * @param {Function} onFinished - Callback after frame.
+     * @param {Function} onFinished
      */
     setFinalDeathFrame(onFinished) {
         const lastPath = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
         this.img = this.imageCache[lastPath] || this.img;
-        setTimeout(() => onFinished && onFinished(), 500);
+        setTimeout(() => onFinished?.(), 500);
     }
 }
