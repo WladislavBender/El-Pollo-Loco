@@ -187,10 +187,28 @@ class MovableObject extends DrawableObject {
     /**
      * Applies damage to the object.
      */
-    hit() {
-        this.energy = Math.max(0, this.energy - 5);
-        if (!this.isDead()) this.lastHit = new Date().getTime();
+    /**
+ * Applies damage to the object depending on attacker type.
+ * @param {MovableObject} attacker - Enemy that caused the hit.
+ */
+    hit(attacker) {
+        // Character hat eigene Hit-Logik → hier überspringen
+        if (this instanceof Character) return;
+
+        let damage = 1;
+        if (attacker instanceof Chicken || attacker instanceof ChickenSmall) {
+            damage = 1;
+        } else if (attacker instanceof Endboss) {
+            damage = 0; // nur für andere Objekte relevant
+        }
+
+        this.energy = Math.max(0, this.energy - damage);
+        if (!this.isDead()) {
+            this.lastHit = new Date().getTime();
+        }
     }
+
+
 
     /**
      * Checks if object is hurt within 1.5s.

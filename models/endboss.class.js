@@ -3,9 +3,10 @@ class Endboss extends MovableObject {
     width = 250;
     y = 55;
     x = 2500;
-    energy = 100;
+    energy = 80;
     speed = 25;
     direction = 0.25;
+    damage = 2;
     dead = false;
     inAlert = false;
     inAttack = false;

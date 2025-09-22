@@ -261,7 +261,7 @@ class World {
         if (!enemy.dead && this.character.isColliding(enemy)) {
             if (enemy instanceof Endboss) {
                 enemy.startAttack();
-                this.character.energy = Math.max(this.character.energy - 15, 0);
+                this.character.hit(enemy); // nutzt invincibilityDuration + Damage aus Character.hit()
                 this.statusBar.setPercentage("health", this.character.energy);
                 playHitSound();
                 return;
@@ -279,18 +279,10 @@ class World {
                 }
             } else {
                 // sonst Schaden für den Character
-                this.character.hit();
+                this.character.hit(enemy);
                 this.statusBar.setPercentage("health", this.character.energy);
                 playHitSound();
             }
-
-            if (this.character.isColliding(enemy)) {
-                console.log('collide', idx, 'charBottom:', (this.character.getCollisionBox().y + this.character.getCollisionBox().h),
-                    'enemyTop:', enemy.getCollisionBox().y,
-                    'isJumpingOn:', this.character.isJumpingOn(enemy),
-                    'speedY:', this.character.speedY);
-            }
-
         }
     }
 

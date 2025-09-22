@@ -8,6 +8,12 @@ class Character extends MovableObject {
     deathSequenceStarted = false;
     deathAnimationPlayed = false;
 
+    isHurtActive = false;
+    hurtDuration = 600; // ms - Dauer der Hurt-Animation
+    invincibilityDuration = 50;
+    lastHitTime = 0;
+
+
     IMAGES_IDLE = [
         'img/2_character_pepe/1_idle/idle/I-1.png', 'img/2_character_pepe/1_idle/idle/I-2.png',
         'img/2_character_pepe/1_idle/idle/I-3.png', 'img/2_character_pepe/1_idle/idle/I-4.png',
@@ -176,11 +182,14 @@ class Character extends MovableObject {
     handleAnimations() {
         if (!this.world?.keyboard) return;
         const kb = this.world.keyboard;
+
         if (this.isDead()) return;
-        if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT);
+        if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT); // nutzt MovableObject.isHurt()
         if (this.isAboveGround()) return this.playAnimation(this.IMAGES_JUMPING);
+
         this.handleGroundAnimations(kb);
     }
+
 
     /**
      * Handles animations when character is on the ground.
@@ -205,6 +214,33 @@ class Character extends MovableObject {
     isDead() {
         return this.energy <= 0;
     }
+
+    hit(attacker) {
+        const now = Date.now();
+        if (now - this.lastHitTime < this.invincibilityDuration) {
+            return; // noch unverwundbar
+        }
+
+        let damage = 5; // Standard
+
+        if (attacker instanceof Chicken || attacker instanceof ChickenSmall) {
+            damage = 1;
+        } else if (attacker instanceof Endboss) {
+            damage = attacker.damage; // <-- dynamisch aus Endboss-Klasse
+        }
+
+        this.energy = Math.max(0, this.energy - damage);
+        this.lastHitTime = now;
+
+        this.isHurtActive = true;
+        setTimeout(() => this.isHurtActive = false, this.hurtDuration);
+    }
+
+
+    isHurt() {
+        return this.isHurtActive;
+    }
+
 
     /**
      * Starts death sequence and animation.
