@@ -19,11 +19,41 @@ class MovableObject extends DrawableObject {
      * @returns {{ x:number, y:number, w:number, h:number }} Collision box.
      */
     getCollisionBox() {
-        if (this instanceof Character) return this.getCharacterCollisionBox();
+        if (this instanceof Character) {
+            // Character-Box enger machen, vor allem unten,
+            // damit man beim "von oben springen" nicht zu früh Schaden nimmt
+            const offsetX = 30;       // schmaler, damit die Arme nicht zählen
+            const offsetYTop = 110;    // oberer Teil ausblenden (Kopf/Hut/Haare)
+            const offsetYBottom = 10; // Füße etwas wegnehmen, damit Bodenkontakt sauber bleibt
+            return {
+                x: this.x + offsetX,
+                y: this.y + offsetYTop,
+                w: this.width - offsetX * 2,
+                h: this.height - offsetYTop - offsetYBottom
+            };
+        }
+
         if (this instanceof Endboss) return this.getEndbossCollisionBox();
         if (this instanceof ThrowableObject) return this.getBottleCollisionBox();
+
+        if (this instanceof Chicken || this instanceof ChickenSmall) {
+            // Chickens enger machen → Trefferbereich "Körpermitte"
+            const offsetX = 10;       // Seiten wegschneiden (Flügel)
+            const offsetYTop = 5;    // oberhalb vom Kopf etwas frei lassen
+            const offsetYBottom = 15; // unten freier Bereich, damit Sprung zuverlässiger zählt
+            return {
+                x: this.x + offsetX,
+                y: this.y + offsetYTop,
+                w: this.width - offsetX * 2,
+                h: this.height - offsetYTop - offsetYBottom
+            };
+        }
+
+        // Default: volle Box
         return { x: this.x, y: this.y, w: this.width, h: this.height };
     }
+
+
 
     /**
      * Gets collision box for Endboss.
@@ -184,4 +214,46 @@ class MovableObject extends DrawableObject {
         this.img = this.imageCache[images[this.currentImage % images.length]];
         this.currentImage++;
     }
+
+    /**
+ * Prüft, ob der Character von oben auf einen Enemy springt.
+ * @param {Chicken|ChickenSmall} enemy 
+ * @returns {boolean}
+ */
+    isJumpingOn(enemy) {
+        // Use same offsets as getCharacterCollisionBox() in MovableObject
+        const offsetX = 20;
+        const offsetYTop = 120;
+        const offsetYBottom = 20;
+
+        // aktuelle Collision-Box des Char
+        const charBox = this.getCollisionBox(); // { x, y, w, h }   (MovableObject.getCharacterCollisionBox)
+        // vorherige Collision-Box (berechnet aus prevY)
+        const charPrevBox = {
+            x: this.x + offsetX,
+            y: this.prevY + offsetYTop,
+            w: this.width - offsetX * 2,
+            h: this.height - offsetYTop - offsetYBottom
+        };
+
+        const enemyBox = enemy.getCollisionBox(); // erwartet { x, y, w, h }
+
+        const horizontalOverlap =
+            charBox.x + charBox.w > enemyBox.x &&
+            charBox.x < enemyBox.x + enemyBox.w;
+
+        // war der Character vorher oberhalb der Kopfkante des Enemys?
+        const wasAbove = (charPrevBox.y + charPrevBox.h) <= (enemyBox.y + 8); // 8px tolerance
+
+        // jetzt berührt der Character die obere Kante des Enemys (oder hat sie gerade überschritten)
+        const nowTouchesTop = (charBox.y + charBox.h) >= (enemyBox.y) &&
+            (charPrevBox.y + charPrevBox.h) <= (enemyBox.y + 30); // 30px grace
+
+        // Character muss sich nach unten bewegen (speedY < 0 in deiner Gravilogik)
+        const movingDown = this.speedY < 0;
+
+        return horizontalOverlap && wasAbove && nowTouchesTop && movingDown;
+    }
+
+
 }

@@ -244,7 +244,7 @@ class World {
      */
     checkCollisions() {
         if (this.paused) return;
-        this.level.enemies.forEach(enemy => this.handleEnemyCollision(enemy));
+        this.level.enemies.forEach((enemy, idx) => this.handleEnemyCollision(enemy, idx));
         this.collectableObjects = this.collectableObjects.filter(obj => !this.collectItem(obj));
         if (this.character.isDead()) this.endGame(false);
     }
@@ -253,18 +253,44 @@ class World {
      * Handles collision with an enemy.
      * @param {Object} enemy - The enemy object.
      */
-    handleEnemyCollision(enemy) {
+    handleEnemyCollision(enemy, idx) {
         if (!enemy.dead && this.character.isColliding(enemy)) {
             if (enemy instanceof Endboss) {
                 enemy.startAttack();
                 this.character.energy = Math.max(this.character.energy - 15, 0);
-            } else {
-                this.character.hit();
+                this.statusBar.setPercentage("health", this.character.energy);
+                playHitSound();
+                return;
             }
-            this.statusBar.setPercentage("health", this.character.energy);
-            playHitSound();
+
+            // Wenn der Character von oben landet -> kill
+            if (this.character.isJumpingOn(enemy)) {
+                // benutze vorhandene killChicken (entfernt nach kurzer Zeit)
+                if (enemy instanceof Chicken) {
+                    this.killChicken(enemy, idx);
+                    this.character.speedY = 6; // kleiner Hüpfer nach dem Kill
+                } else {
+                    // Fallback
+                    enemy.die();
+                }
+            } else {
+                // sonst Schaden für den Character
+                this.character.hit();
+                this.statusBar.setPercentage("health", this.character.energy);
+                playHitSound();
+            }
+
+            if (this.character.isColliding(enemy)) {
+                console.log('collide', idx, 'charBottom:', (this.character.getCollisionBox().y + this.character.getCollisionBox().h),
+                    'enemyTop:', enemy.getCollisionBox().y,
+                    'isJumpingOn:', this.character.isJumpingOn(enemy),
+                    'speedY:', this.character.speedY);
+            }
+
         }
     }
+
+
 
     /**
      * Collects a coin or bottle if collided.

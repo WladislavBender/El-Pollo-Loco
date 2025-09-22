@@ -58,8 +58,13 @@ class Character extends MovableObject {
         this.loadAllImages();
         this.applyGravity();
         this.lastMoveTime = new Date().getTime();
+
+        // <-- neue Variable zum Vergleichen der vorherigen Y-Position
+        this.prevY = this.y;
+
         this.animate();
     }
+
 
     /**
      * Loads all image sets for character animations.
@@ -86,6 +91,7 @@ class Character extends MovableObject {
      */
     handleMovement() {
         if (!this.world?.keyboard) return;
+        this.prevY = this.y;
         const kb = this.world.keyboard;
         let moved = false;
         moved = this.processHorizontalMovement(kb) || moved;
