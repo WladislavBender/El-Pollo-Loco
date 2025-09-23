@@ -34,9 +34,9 @@ class MovableObject extends DrawableObject {
      * Gets collision box for Character.
      */
     getCharacterCollisionBox() {
-        const offsetX = 30;
-        const offsetYTop = 110;
-        const offsetYBottom = 10;
+        const offsetX = 45;
+        const offsetYTop = 180;
+        const offsetYBottom = 0;
         return {
             x: this.x + offsetX,
             y: this.y + offsetYTop,
@@ -61,15 +61,23 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * Gets collision box for a flying bottle.
-     */
+ * Gets collision box for a flying bottle.
+ * Safer: benutzt proportionale Margins und stellt positive w/h sicher.
+ */
     getBottleCollisionBox() {
-        const offset = 20;
+        // Verwende 15% der Breite/Höhe als Margin (mind. 6px), so wird die Box
+        // kleiner, aber nie negativ.
+        const marginX = Math.max(6, Math.round(this.width * 0.15));
+        const marginY = Math.max(6, Math.round(this.height * 0.15));
+
+        const w = Math.max(2, this.width - marginX * 2);
+        const h = Math.max(2, this.height - marginY * 2);
+
         return {
-            x: this.x + offset,
-            y: this.y + offset,
-            w: this.width - offset * 2,
-            h: this.height - offset * 2
+            x: this.x + marginX,
+            y: this.y + marginY,
+            w,
+            h
         };
     }
 
@@ -77,8 +85,8 @@ class MovableObject extends DrawableObject {
      * Gets collision box for chickens.
      */
     getChickenCollisionBox() {
-        const offsetX = 20;
-        const offsetYTop = 5;
+        const offsetX = 5;
+        const offsetYTop = 15;
         const offsetYBottom = 15;
         return {
             x: this.x + offsetX,
@@ -92,7 +100,7 @@ class MovableObject extends DrawableObject {
      * Gets collision box for coins.
      */
     getCoinCollisionBox() {
-        const offset = 60;
+        const offset = 65;
         return {
             x: this.x + offset,
             y: this.y + offset,
@@ -101,19 +109,22 @@ class MovableObject extends DrawableObject {
         };
     }
 
+
     /**
      * Gets collision box for collectable bottles.
      */
     getBottleCollectableCollisionBox() {
-        const offsetX = 40;
-        const offsetY = 10;
+        const marginX = this.width * 0.35;  // links & rechts 35% weg
+        const marginY = this.height * 0.35; // oben & unten 35% weg
         return {
-            x: this.x + offsetX,
-            y: this.y + offsetY,
-            w: this.width - offsetX * 2,
-            h: this.height - offsetY * 2
+            x: this.x + marginX,
+            y: this.y + marginY,
+            w: this.width - marginX * 2,
+            h: this.height - marginY * 2
         };
     }
+
+
 
     /**
      * Checks collision with another movable object.
@@ -129,15 +140,39 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * Checks collision with a collectable object.
-     * @param {Object} mo - Collectable object.
-     * @returns {boolean}
-     */
+ * Checks collision with a collectable object (nur für Boden-Bottles).
+ * Coins werden wie bisher direkt überlappt, ohne Durchlauf-Check.
+ * @param {MovableObject} mo - Collectable object.
+ * @returns {boolean}
+ */
     isCollidingCollectable(mo) {
-        const a = this.getCollisionBox();
-        const b = { x: mo.x, y: mo.y, w: mo.width, h: mo.height };
-        return this.boxesOverlap(a, b);
+        // Coins: direkt klassisch checken (keine Durchlauf-Logik)
+        if (mo.type === 'coin') {
+            const charBox = this.getCollisionBox();
+            const collBox = mo.getCollisionBox();
+            return this.boxesOverlap(charBox, collBox);
+        }
+
+        // Nur Collectable Bottles (keine ThrowableObjects!)
+        if (mo.type === 'bottle' && !(mo instanceof ThrowableObject)) {
+            const charBox = this.getCollisionBox();
+            const collBox = mo.getCollisionBox();
+
+            // Mittelpunkt Character
+            const charCenterX = charBox.x + charBox.w / 2;
+            const bottleCenterX = collBox.x + collBox.w / 2;
+
+            const overlap = this.boxesOverlap(charBox, collBox);
+
+            // Einsammeln nur wenn Overlap UND Character-Mitte über Bottle-Mitte
+            return overlap && Math.abs(charCenterX - bottleCenterX) < collBox.w / 2;
+        }
+
+        return false;
     }
+
+
+
 
     /**
      * Checks if two collision boxes overlap.
@@ -240,7 +275,7 @@ class MovableObject extends DrawableObject {
      */
     hasHorizontalOverlap(charBox, enemyBox) {
         return charBox.x + charBox.w > enemyBox.x &&
-               charBox.x < enemyBox.x + enemyBox.w;
+            charBox.x < enemyBox.x + enemyBox.w;
     }
 
     /**
@@ -255,7 +290,7 @@ class MovableObject extends DrawableObject {
      */
     nowTouchesEnemyTop(charBox, prevBox, enemyBox) {
         return (charBox.y + charBox.h) >= enemyBox.y &&
-               (prevBox.y + prevBox.h) <= enemyBox.y + 40;
+            (prevBox.y + prevBox.h) <= enemyBox.y + 40;
     }
 
     /**
