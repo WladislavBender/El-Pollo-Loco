@@ -7,7 +7,6 @@ class Character extends MovableObject {
     lastMoveTime;
     deathSequenceStarted = false;
     deathAnimationPlayed = false;
-
     isHurtActive = false;
     hurtDuration = 600;
     invincibilityDuration = 50;

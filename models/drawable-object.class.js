@@ -6,7 +6,7 @@ class DrawableObject {
     y = 280;
     height = 150;
     width = 100;
-    debugFrames = true;
+    debugFrames = false;
 
     /**
      * Loads a single image.
@@ -106,16 +106,4 @@ class DrawableObject {
     getCollisionBox() {
         return { x: this.x, y: this.y, w: this.width, h: this.height };
     }
-
-    /**
-     * Provides offsets depending on object type.
-     * @returns {{offsetX:number, offsetYTop:number, offsetYBottom:number}}
-     */
-    // getOffsets() {
-    //     if (this.isCharacter()) return { offsetX: 20, offsetYTop: 30, offsetYBottom: 50 };
-    //     if (this.isChicken()) return { offsetX: 10, offsetYTop: 10, offsetYBottom: 10 };
-    //     if (this.isCoin()) return { offsetX: 10, offsetYTop: 10, offsetYBottom: 10 };
-    //     if (this.isBottle()) return { offsetX: 3, offsetYTop: 3, offsetYBottom: 3 };
-    //     return { offsetX: 0, offsetYTop: 0, offsetYBottom: 0 };
-    // }
 }

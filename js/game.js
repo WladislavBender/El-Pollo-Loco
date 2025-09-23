@@ -352,4 +352,3 @@ function togglePause() {
     if (gamePaused) resumeGame();
     else pauseGame();
 }
-
